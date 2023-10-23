@@ -8,14 +8,17 @@ import random
 import numpy as np
 
 from arguments import parse_args  # , wandb_init
-from networks import Linear
+# from networks import Linear
 from networks import ProgressNet
-from networks import RSDNet, RSDNetFlat, LSTMNet
-from networks import ToyNet, ResNet
+# from networks import RSDNet, RSDNetFlat, LSTMNet
+# from networks import ToyNet, ResNet
 from datasets import FeatureDataset, ImageDataset, UCFDataset
 from datasets import Subsample, Subsection, Truncate
 from experiment import Experiment
 from train_functions import train_flat_features, train_flat_frames, train_progress, train_rsd, embed_frames
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def set_seeds(seed: int) -> None:
@@ -62,64 +65,38 @@ def main():
             transform.append(transforms.Resize((224, 224), antialias=True))
         transform = transforms.Compose(transform)
 
-        if "ucf24" in args.dataset:
-            trainset = UCFDataset(
-                data_root,
-                args.data_dir,
-                args.train_split,
-                args.bboxes,
-                args.flat,
-                args.subsample_fps,
-                args.random,
-                args.indices,
-                args.indices_normalizer,
-                args.rsd_type,
-                args.fps,
-                transform=transform,
-                sample_transform=subsample,
-            )
-            testset = UCFDataset(
-                data_root,
-                args.data_dir,
-                args.test_split,
-                args.bboxes,
-                args.flat,
-                args.subsample_fps,
-                args.random,
-                args.indices,
-                args.indices_normalizer,
-                args.rsd_type,
-                args.fps,
-                transform=transform,
-            )
-        else:
-            trainset = ImageDataset(
-                data_root,
-                args.data_dir,
-                args.train_split,
-                args.flat,
-                args.subsample_fps,
-                args.random,
-                args.indices,
-                args.indices_normalizer,
-                args.shuffle,
-                transform=transform,
-                sample_transform=subsample,
-            )
-            testset = ImageDataset(
-                data_root,
-                args.data_dir,
-                args.test_split,
-                args.flat,
-                args.subsample_fps,
-                args.random,
-                args.indices,
-                args.indices_normalizer,
-                args.shuffle,
-                transform=transform,
-            )
-    else:
-        trainset = FeatureDataset(
+        # if "ucf24" in args.dataset:
+        #    trainset = UCFDataset(
+        #        data_root,
+        #        args.data_dir,
+        #        args.train_split,
+        #        args.bboxes,
+        #        args.flat,
+        #        args.subsample_fps,
+        #        args.random,
+        #        args.indices,
+        #        args.indices_normalizer,
+        #        args.rsd_type,
+        #        args.fps,
+        #        transform=transform,
+        #        sample_transform=subsample,
+        #    )
+        #    testset = UCFDataset(
+        #        data_root,
+        #        args.data_dir,
+        #        args.test_split,
+        #        args.bboxes,
+        #        args.flat,
+        #        args.subsample_fps,
+        #        args.random,
+        #        args.indices,
+        #        args.indices_normalizer,
+        #        args.rsd_type,
+        #        args.fps,
+        #        transform=transform,
+        #    )
+        # else:
+        trainset = ImageDataset(
             data_root,
             args.data_dir,
             args.train_split,
@@ -128,11 +105,11 @@ def main():
             args.random,
             args.indices,
             args.indices_normalizer,
-            args.rsd_type,
-            args.fps,
+            args.shuffle,
+            transform=transform,
             sample_transform=subsample,
         )
-        testset = FeatureDataset(
+        testset = ImageDataset(
             data_root,
             args.data_dir,
             args.test_split,
@@ -141,9 +118,35 @@ def main():
             args.random,
             args.indices,
             args.indices_normalizer,
-            args.rsd_type,
-            args.fps,
+            args.shuffle,
+            transform=transform,
         )
+    # else:
+    #    trainset = FeatureDataset(
+    #        data_root,
+    #        args.data_dir,
+    #        args.train_split,
+    #        args.flat,
+    #        args.subsample_fps,
+    #        args.random,
+    #        args.indices,
+    #        args.indices_normalizer,
+    #        args.rsd_type,
+    #        args.fps,
+    #        sample_transform=subsample,
+    #    )
+    #    testset = FeatureDataset(
+    #        data_root,
+    #        args.data_dir,
+    #        args.test_split,
+    #        args.flat,
+    #        args.subsample_fps,
+    #        args.random,
+    #        args.indices,
+    #        args.indices_normalizer,
+    #        args.rsd_type,
+    #        args.fps,
+    #    )
 
     trainloader = DataLoader(
         trainset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True
@@ -160,7 +163,7 @@ def main():
     else:
         backbone_path = None
 
-    if args.network == "progressnet":
+    # if args.network == "progressnet":
         network = ProgressNet(
             args.pooling_layers,
             args.roi_size,
@@ -170,21 +173,21 @@ def main():
             args.backbone,
             backbone_path,
         )
-    elif args.network == "rsdnet_flat":
-        network = RSDNetFlat(args.backbone, backbone_path)
-    elif args.network == 'lstmnet':
-        network = LSTMNet(args.feature_dim, args.dropout_chance, args.finetune)
-    elif args.network == "rsdnet":
-        network = RSDNet(args.feature_dim, args.rsd_normalizer,
-                         args.dropout_chance, args.finetune)
-    elif args.network == "ute":
-        network = Linear(args.feature_dim, args.embed_dim, args.dropout_chance)
-    elif args.network == "toynet":
-        network = ToyNet(dropout_chance=args.dropout_chance)
-    elif args.network == "resnet":
-        network = ResNet(args.backbone, backbone_path, args.dropout_chance)
-    else:
-        raise Exception(f"Network {args.network} does not exist")
+    # elif args.network == "rsdnet_flat":
+    #     network = RSDNetFlat(args.backbone, backbone_path)
+    # elif args.network == 'lstmnet':
+    #     network = LSTMNet(args.feature_dim, args.dropout_chance, args.finetune)
+    # elif args.network == "rsdnet":
+    #     network = RSDNet(args.feature_dim, args.rsd_normalizer,
+    #                      args.dropout_chance, args.finetune)
+    # elif args.network == "ute":
+    #     network = Linear(args.feature_dim, args.embed_dim, args.dropout_chance)
+    # elif args.network == "toynet":
+    #     network = ToyNet(dropout_chance=args.dropout_chance)
+    # elif args.network == "resnet":
+    #     network = ResNet(args.backbone, backbone_path, args.dropout_chance)
+    # else:
+    #     raise Exception(f"Network {args.network} does not exist")
 
     # load network file if available
     if args.load_experiment and args.load_iteration:

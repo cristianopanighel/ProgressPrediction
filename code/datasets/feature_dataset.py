@@ -3,6 +3,7 @@ import os
 import torch
 from typing import List
 from tqdm import tqdm
+import numpy as np
 
 from .utils import load_splitfile
 
@@ -56,10 +57,15 @@ class FeatureDataset(Dataset):
             path = os.path.join(root, f"{video_name}.txt")
             with open(path) as f:
                 video_data = f.readlines()
+            # path = os.path.join(root, f"{video_name}.npy")
+            # with open(path, 'rb') as f:
+            #     video_data = np.load(f)
             # TODO: Video subsampling
             video_data = torch.FloatTensor(
                 [list(map(float, row.split(" "))) for row in video_data]
             )
+            # for row in video_data:
+            #    video_data = torch.FloatTensor([row])
             video_data = video_data[::self.subsample_fps, :]
             S, F = video_data.shape
             lengths.append(S)

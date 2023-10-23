@@ -12,6 +12,9 @@ from torchvision.utils import make_grid
 from torchvision.io import read_image
 import subprocess
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -87,10 +90,15 @@ def create_data(args):
 
     video_names = [f'{video_id:05d}\n' for video_id in range(args.num_videos)]
     random.shuffle(video_names)
-    with open(os.path.join(save_dir, 'splitfiles', 'train.txt'), 'w+') as f:
-        f.writelines(sorted(video_names[:int(0.9 * args.num_videos)]))
-    with open(os.path.join(save_dir, 'splitfiles', 'test.txt'), 'w+') as f:
-        f.writelines(sorted(video_names[int(0.9 * args.num_videos):]))
+    # with open(os.path.join(save_dir, 'splitfiles', 'train.txt'), 'w+') as f:
+    #     f.writelines(sorted(video_names[:int(0.9 * args.num_videos)]))
+    # with open(os.path.join(save_dir, 'splitfiles', 'test.txt'), 'w+') as f:
+    #     f.writelines(sorted(video_names[int(0.9 * args.num_videos):]))
+
+    with open(os.path.join(save_dir, 'splitfiles/', 'test.npy'), 'wb') as f:
+        np.save(f, sorted(video_names[int(0.9 * args.num_videos):]))
+    with open(os.path.join(save_dir, 'splitfiles/', 'train.npy'), 'wb') as f:
+        np.save(f, sorted(video_names[:int(0.9 * args.num_videos)]))
 
 
 def visualise(args):

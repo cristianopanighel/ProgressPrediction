@@ -20,9 +20,9 @@ class ProgressNet(nn.Module):
         backbone_path: str = None,
     ) -> None:
         super().__init__()
-        if torch.backends.mps.is_available():
-            self.device = "mps"
-        elif torch.cuda.is_available():
+        # if torch.backends.mps.is_available():
+        #    self.device = "mps"
+        if torch.cuda.is_available():
             self.device = "cuda"
         else:
             self.device = "cpu"
@@ -30,6 +30,8 @@ class ProgressNet(nn.Module):
             self.backbone = models.vgg16().features
         elif backbone == "vgg11":
             self.backbone = models.vgg11().features
+        elif backbone == "resnet18":
+            self.backbone = models.resnet18()
         else:
             raise Exception(
                 f"Backbone {backbone} cannot be used for ProgressnetFlat")
@@ -53,8 +55,8 @@ class ProgressNet(nn.Module):
         self.fc7 = nn.Linear(embed_dim * 2, 64)
         self.fc7_dropout = nn.Dropout(p=dropout_chance)
 
-        self.lstm1 = nn.LSTM(64, 32, batch_first=True)
-        self.lstm2 = nn.LSTM(32, 32, batch_first=True)
+        self.lstm1 = nn.GRU(64, 32, batch_first=True)
+        self.lstm2 = nn.GRU(32, 32, batch_first=True)
 
         if finetune:
             for param in self.parameters():
@@ -65,6 +67,7 @@ class ProgressNet(nn.Module):
         self.hidden1, self.hidden2 = None, None
 
     def forward(self, frames: torch.FloatTensor, boxes: torch.Tensor = None) -> torch.FloatTensor:
+        # B = batch size, S = sequence size, C = channels, H = Height, W = width
         B, S, C, H, W = frames.shape
         num_samples = B * S
 
@@ -112,6 +115,7 @@ class ProgressNet(nn.Module):
         return data.reshape(B, S)
 
     def embed(self, frames, boxes=None):
+        # B = batch size, C = channels, H = Height, W = width
         B, C, H, W = frames.shape
 
         if boxes is None:

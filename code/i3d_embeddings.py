@@ -5,21 +5,29 @@ from tqdm import tqdm
 import argparse
 import os
 import pickle
+import numpy as np
 
 from networks import InceptionI3d
 from datasets import ChunkDataset, load_splitfile
 from experiment import get_device
 from main import set_seeds
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def load_npy(path: str):
+    with open(path, 'rb') as f:
+        names = np.load(f).tolist()
+    return [name.strip() for name in names]
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument(
-        "--model_path", type=str, default=os.environ.get("MODEL", "/Users/cristianopanighel/Desktop/Datasets/models/rgb_imagenet.pth")
-    )
-    parser.add_argument("--root", type=str, default=os.environ.get("MAIN",
-                        "/Users/cristianopanighel/Desktop/Datasets/"))
+    parser.add_argument("--model_path", type=str,
+                        default=os.environ.get("MODEL"))
+    parser.add_argument("--root", type=str, default=os.environ.get("MAIN"))
     parser.add_argument("--dataset", type=str, default="bars/")
     parser.add_argument(
         "--save_dir",
@@ -48,6 +56,16 @@ def main():
     if args.splitfile.endswith(".txt"):
         split_path = os.path.join(data_root, "splitfiles/", args.splitfile)
         splitnames = load_splitfile(split_path)
+        for video_name in tqdm(splitnames):
+            video_path = os.path.join(data_root, "rgb-images/", video_name)
+            frame_paths = [
+                os.path.join(video_path, frame_name)
+                for frame_name in sorted(os.listdir(video_path))
+            ][::args.subsample_fps]
+            data.append((video_name, frame_paths))
+    elif args.splitfile.endswith(".npy"):
+        split_path = os.path.join(data_root, "splitfiles/", args.splitfile)
+        splitnames = load_npy(split_path)
         for video_name in tqdm(splitnames):
             video_path = os.path.join(data_root, "rgb-images/", video_name)
             frame_paths = [
@@ -92,7 +110,7 @@ def main():
                 for embedding in embeddings:
                     embedding_texts.append(" ".join(map(str, embedding)))
             save_path = os.path.join(
-                args.root, args.dataset, args.save_dir, f"{video_name}.txt"
+                args.root, args.dataset, args.save_dir, f"{video_name}.npy"
             )
             if "/" in save_path:
                 directories = "/".join(save_path.split("/")[:-1])
@@ -100,8 +118,10 @@ def main():
                     os.makedirs(directories, exist_ok=True)
                 except FileExistsError:
                     pass
-            with open(save_path, "w+") as f:
-                f.write("\n".join(embedding_texts))
+            # with open(save_path, "w+") as f:
+            #     f.write("\n".join(embedding_texts))
+            with open(save_path, 'wb') as f:
+                np.save(f, "\n".join(embedding_texts))
 
 
 if __name__ == "__main__":

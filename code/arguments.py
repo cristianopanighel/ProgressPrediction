@@ -1,6 +1,9 @@
 import argparse
 import os
+from dotenv import load_dotenv
 # import wandb
+
+load_dotenv()
 
 
 def parse_args() -> argparse.Namespace:
@@ -8,8 +11,7 @@ def parse_args() -> argparse.Namespace:
     # experiment
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--experiment_name", type=str, default=None)
-    parser.add_argument("--root", type=str, default=os.environ.get("MAIN",
-                        "/Users/cristianopanighel/Desktop/Datasets/"))
+    parser.add_argument("--root", type=str, default=os.environ.get("MAIN"))
     # wandb
     # parser.add_argument("--wandb_project", type=str, default="final")
     # parser.add_argument("--wandb_name", type=str, default=None)
@@ -18,8 +20,9 @@ def parse_args() -> argparse.Namespace:
     # parser.add_argument("--wandb_disable", action="store_true")
     # data
     parser.add_argument("--dataset", type=str, default="bars/")
-    parser.add_argument("--data_dir", type=str,
-                        default="features/i3d_embeddings/")
+    # parser.add_argument("--data_dir", type=str,
+    #                     default="features/i3d_embeddings/")
+    parser.add_argument("--data_dir", type=str, default="rgb-images/")
     # use images instead of image sequences
     parser.add_argument("--flat", action="store_true")
     # use bounding box data (available for UCF101-24)

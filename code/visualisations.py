@@ -17,6 +17,9 @@ import random
 
 from datasets import FeatureDataset, ImageDataset, UCFDataset
 from datasets import Middle
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Constants
 DATA_ROOT = os.environ.get("MAIN")

@@ -165,9 +165,9 @@ def create_activity_mnist(
     os.makedirs(f'{args.path}{args.dataset}/experiments', exist_ok=True)
     os.makedirs(f'{args.path}{args.dataset}/splitfiles', exist_ok=True)
 
-    if torch.backends.mps.is_available():
-        device = "mps"
-    elif torch.cuda.is_available():
+    # if torch.backends.mps.is_available():
+    #    device = "mps"
+    if torch.cuda.is_available():
         device = "cuda"
     else:
         device = "cpu"

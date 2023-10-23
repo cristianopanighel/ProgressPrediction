@@ -11,9 +11,9 @@ from tqdm import tqdm
 
 
 def get_device() -> torch.device:
-    if torch.backends.mps.is_available():
-        device = "mps"
-    elif torch.cuda.is_available():
+    # if torch.backends.mps.is_available():
+    #    device = "mps"
+    if torch.cuda.is_available():
         device = "cuda"
     else:
         device = "cpu"
