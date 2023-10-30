@@ -6,12 +6,10 @@ from tqdm import tqdm
 import os
 import random
 import numpy as np
+import wandb
 
-from arguments import parse_args  # , wandb_init
-# from networks import Linear
+from arguments import parse_args, wandb_init
 from networks import ProgressNet
-# from networks import RSDNet, RSDNetFlat, LSTMNet
-# from networks import ToyNet, ResNet
 from datasets import FeatureDataset, ImageDataset, UCFDataset
 from datasets import Subsample, Subsection, Truncate
 from experiment import Experiment
@@ -31,6 +29,7 @@ def main():
     args = parse_args()
     set_seeds(args.seed)
 
+    wandb.login()
     # root can be set manually, but can also be obtained automatically so wandb sweeps work properly
     if args.root is not None:
         root = args.root
@@ -173,19 +172,6 @@ def main():
             args.backbone,
             backbone_path,
         )
-    # elif args.network == "rsdnet_flat":
-    #     network = RSDNetFlat(args.backbone, backbone_path)
-    # elif args.network == 'lstmnet':
-    #     network = LSTMNet(args.feature_dim, args.dropout_chance, args.finetune)
-    # elif args.network == "rsdnet":
-    #     network = RSDNet(args.feature_dim, args.rsd_normalizer,
-    #                      args.dropout_chance, args.finetune)
-    # elif args.network == "ute":
-    #     network = Linear(args.feature_dim, args.embed_dim, args.dropout_chance)
-    # elif args.network == "toynet":
-    #     network = ToyNet(dropout_chance=args.dropout_chance)
-    # elif args.network == "resnet":
-    #     network = ResNet(args.backbone, backbone_path, args.dropout_chance)
     # else:
     #     raise Exception(f"Network {args.network} does not exist")
 
@@ -256,7 +242,7 @@ def main():
     else:
         train_fn = train_progress
 
-    # wandb_init(args)
+    wandb_init(args)
     # create and start the experiment
     experiment = Experiment(
         network,
@@ -299,6 +285,8 @@ def main():
 
     elif not args.print_only:
         experiment.run(args.iterations, args.log_every, args.test_every)
+
+    wandb.finish()
 
 
 if __name__ == "__main__":

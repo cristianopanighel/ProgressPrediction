@@ -5,7 +5,7 @@ import random
 import numpy as np
 from typing import Dict
 import os
-# import wandb
+import wandb
 import statistics
 from tqdm import tqdm
 
@@ -164,5 +164,5 @@ class Experiment:
         }
         log[f"{prefix}_count"] = result["count"]
         log["iteration"] = iteration
-        # wandb.log(log)
+        wandb.log(log)
         return self.result.copy()

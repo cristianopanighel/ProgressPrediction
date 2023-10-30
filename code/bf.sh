@@ -7,7 +7,7 @@ python main.py --seed 42 \
     --train_split all_scrambledegg.txt \
     --test_split test_scrambledegg_s1.txt \
     --batch_size 1 \
-    --network progressnet_flat \
+    --network progressnet \
     --backbone vgg16 \
     --load_experiment progressnet_flat_bf_scrambledegg_1 \
     --load_iteration 500 \

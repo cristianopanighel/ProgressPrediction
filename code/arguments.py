@@ -1,7 +1,7 @@
 import argparse
 import os
 from dotenv import load_dotenv
-# import wandb
+import wandb
 
 load_dotenv()
 
@@ -13,11 +13,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--experiment_name", type=str, default=None)
     parser.add_argument("--root", type=str, default=os.environ.get("MAIN"))
     # wandb
-    # parser.add_argument("--wandb_project", type=str, default="final")
-    # parser.add_argument("--wandb_name", type=str, default=None)
-    # parser.add_argument("--wandb_tags", type=str, nargs="+")
-    # parser.add_argument("--wandb_group", type=str, default=None)
-    # parser.add_argument("--wandb_disable", action="store_true")
+    parser.add_argument("--wandb_project", type=str, default="final")
+    parser.add_argument("--wandb_name", type=str, default=None)
+    parser.add_argument("--wandb_disable", action="store_true")
     # data
     parser.add_argument("--dataset", type=str, default="bars/")
     # parser.add_argument("--data_dir", type=str,
@@ -60,8 +58,6 @@ def parse_args() -> argparse.Namespace:
         "--network",
         type=str,
         default="progressnet",
-        choices=['progressnet', 'rsdnet_flat', 'rsdnet',
-                 'lstmnet', 'ute', 'toynet', 'resnet']
     )
     parser.add_argument(
         "--backbone",
@@ -112,19 +108,17 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# def wandb_init(args):
-#     no_wandb = (
-#         args.wandb_disable or args.print_only or args.eval or args.embed or (
-#             args.save_dir is not None)
-#     )
-#     if no_wandb:
-#         return
-#
-#     # TODO: Config = args (possibly on reruns)
-#     wandb.init(
-#         project=args.wandb_project,
-#         name=args.wandb_name,
-#         group=args.wandb_group,
-#         tags=args.wandb_tags,
-#         config=args,
-#     )
+def wandb_init(args):
+    #     no_wandb = (
+    #         args.wandb_disable or args.print_only or args.eval or args.embed or (
+    #             args.save_dir is not None)
+    #     )
+    #     if no_wandb:
+    #         return
+    #
+    #     # TODO: Config = args (possibly on reruns)
+    wandb.init(
+        project=args.wandb_project,
+        name=args.wandb_name,
+        config=args,
+    )
