@@ -8,54 +8,54 @@ from typing import List, Tuple
 from copy import copy
 import statistics
 
-root = os.environ.get("CHOLEC80")
+# root = os.environ.get("CHOLEC80")
 
 
-def save_fold(data: List[Tuple[str, int]], fold_name: str) -> None:
-    names = [video[0] for video in data]
-    t1 = names[:27]
-    t2 = names[27: 27 + 27]
-    t12 = names[: 27 + 27]
-    v = names[27 + 27: 27 + 27 + 6]
-    e = names[27 + 27 + 6: 27 + 27 + 6 + 20]
-    with open(os.path.join(root, "splitfiles", f"all_{fold_name}.txt"), "w+") as f:
-        f.write("\n".join(sorted(names)))
-    with open(os.path.join(root, "splitfiles", f"t1_{fold_name}.txt"), "w+") as f:
-        f.write("\n".join(sorted(t1)))
-    with open(os.path.join(root, "splitfiles", f"t2_{fold_name}.txt"), "w+") as f:
-        f.write("\n".join(sorted(t2)))
-    with open(os.path.join(root, "splitfiles", f"t12_{fold_name}.txt"), "w+") as f:
-        f.write("\n".join(sorted(t12)))
-    with open(os.path.join(root, "splitfiles", f"v_{fold_name}.txt"), "w+") as f:
-        f.write("\n".join(sorted(v)))
-    with open(os.path.join(root, "splitfiles", f"e_{fold_name}.txt"), "w+") as f:
-        f.write("\n".join(sorted(e)))
+#def save_fold(data: List[Tuple[str, int]], fold_name: str) -> None:
+#    names = [video[0] for video in data]
+#    t1 = names[:27]
+#    t2 = names[27: 27 + 27]
+#    t12 = names[: 27 + 27]
+#    v = names[27 + 27: 27 + 27 + 6]
+#    e = names[27 + 27 + 6: 27 + 27 + 6 + 20]
+#    with open(os.path.join(root, "splitfiles", f"all_{fold_name}.txt"), "w+") as f:
+#        f.write("\n".join(sorted(names)))
+#    with open(os.path.join(root, "splitfiles", f"t1_{fold_name}.txt"), "w+") as f:
+#        f.write("\n".join(sorted(t1)))
+#    with open(os.path.join(root, "splitfiles", f"t2_{fold_name}.txt"), "w+") as f:
+#        f.write("\n".join(sorted(t2)))
+#    with open(os.path.join(root, "splitfiles", f"t12_{fold_name}.txt"), "w+") as f:
+#        f.write("\n".join(sorted(t12)))
+#    with open(os.path.join(root, "splitfiles", f"v_{fold_name}.txt"), "w+") as f:
+#        f.write("\n".join(sorted(v)))
+#    with open(os.path.join(root, "splitfiles", f"e_{fold_name}.txt"), "w+") as f:
+#        f.write("\n".join(sorted(e)))
+#
+#
+#def random_folds(data: List[Tuple[str, int]], start_index: int) -> None:
+#    for i in range(4):
+#        random.shuffle(data)
+#        save_fold(data, str(start_index + i))
+#
 
+#def proper_fold(data: List[Tuple[str, int]], start_index: int) -> None:
+#    random.shuffle(data)
+#    for i in range(4):
+#        save_fold(data, f"{start_index+i}")
+#        data = data[20:] + data[:20]
+#
 
-def random_folds(data: List[Tuple[str, int]], start_index: int) -> None:
-    for i in range(4):
-        random.shuffle(data)
-        save_fold(data, str(start_index + i))
-
-
-def proper_fold(data: List[Tuple[str, int]], start_index: int) -> None:
-    random.shuffle(data)
-    for i in range(4):
-        save_fold(data, f"{start_index+i}")
-        data = data[20:] + data[:20]
-
-
-def create_cholec80_folds():
-    video_names = sorted(os.listdir(os.path.join(root, "rgb-images/")))
-    video_lengths = []
-    for video_name in video_names:
-        video_path = os.path.join(os.path.join(
-            root, "rgb-images/", video_name))
-        num_frames = len(os.listdir(video_path))
-        video_lengths.append(num_frames)
-    video_data = list(zip(video_names, video_lengths))
-    print("--- proper 2 ---")
-    proper_fold(video_data, 0)
+#def create_cholec80_folds():
+#    video_names = sorted(os.listdir(os.path.join(root, "rgb-images/")))
+#    video_lengths = []
+#    for video_name in video_names:
+#        video_path = os.path.join(os.path.join(
+#            root, "rgb-images/", video_name))
+#        num_frames = len(os.listdir(video_path))
+#        video_lengths.append(num_frames)
+#    video_data = list(zip(video_names, video_lengths))
+#    print("--- proper 2 ---")
+#    proper_fold(video_data, 0)
 
 
 def create_networks():
@@ -76,8 +76,10 @@ def create_networks():
 
 def main() -> None:
     random.seed(42)
-    create_cholec80_folds()
+    # print(torch.cuda.get_arch_list())
+    # create_cholec80_folds()
     create_networks()
+    # print(torch.cuda.is_available())
 
 
 if __name__ == "__main__":

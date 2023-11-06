@@ -30,6 +30,7 @@ def main():
     set_seeds(args.seed)
 
     wandb.login()
+    torch.cuda.empty_cache()
     # root can be set manually, but can also be obtained automatically so wandb sweeps work properly
     if args.root is not None:
         root = args.root
@@ -64,62 +65,62 @@ def main():
             transform.append(transforms.Resize((224, 224), antialias=True))
         transform = transforms.Compose(transform)
 
-        # if "ucf24" in args.dataset:
-        #    trainset = UCFDataset(
-        #        data_root,
-        #        args.data_dir,
-        #        args.train_split,
-        #        args.bboxes,
-        #        args.flat,
-        #        args.subsample_fps,
-        #        args.random,
-        #        args.indices,
-        #        args.indices_normalizer,
-        #        args.rsd_type,
-        #        args.fps,
-        #        transform=transform,
-        #        sample_transform=subsample,
-        #    )
-        #    testset = UCFDataset(
-        #        data_root,
-        #        args.data_dir,
-        #        args.test_split,
-        #        args.bboxes,
-        #        args.flat,
-        #        args.subsample_fps,
-        #        args.random,
-        #        args.indices,
-        #        args.indices_normalizer,
-        #        args.rsd_type,
-        #        args.fps,
-        #        transform=transform,
-        #    )
-        # else:
-        trainset = ImageDataset(
-            data_root,
-            args.data_dir,
-            args.train_split,
-            args.flat,
-            args.subsample_fps,
-            args.random,
-            args.indices,
-            args.indices_normalizer,
-            args.shuffle,
-            transform=transform,
-            sample_transform=subsample,
-        )
-        testset = ImageDataset(
-            data_root,
-            args.data_dir,
-            args.test_split,
-            args.flat,
-            args.subsample_fps,
-            args.random,
-            args.indices,
-            args.indices_normalizer,
-            args.shuffle,
-            transform=transform,
-        )
+        if "ucf24" in args.dataset:
+           trainset = UCFDataset(
+               data_root,
+               args.data_dir,
+               args.train_split,
+               args.bboxes,
+               args.flat,
+               args.subsample_fps,
+               args.random,
+               args.indices,
+               args.indices_normalizer,
+               args.rsd_type,
+               args.fps,
+               transform=transform,
+               sample_transform=subsample,
+           )
+           testset = UCFDataset(
+               data_root,
+               args.data_dir,
+               args.test_split,
+               args.bboxes,
+               args.flat,
+               args.subsample_fps,
+               args.random,
+               args.indices,
+               args.indices_normalizer,
+               args.rsd_type,
+               args.fps,
+               transform=transform,
+           )
+        else:
+            trainset = ImageDataset(
+                data_root,
+                args.data_dir,
+                args.train_split,
+                args.flat,
+                args.subsample_fps,
+                args.random,
+                args.indices,
+                args.indices_normalizer,
+                args.shuffle,
+                transform=transform,
+                sample_transform=subsample,
+            )
+            testset = ImageDataset(
+                data_root,
+                args.data_dir,
+                args.test_split,
+                args.flat,
+                args.subsample_fps,
+                args.random,
+                args.indices,
+                args.indices_normalizer,
+                args.shuffle,
+                transform=transform,
+            )
     # else:
     #    trainset = FeatureDataset(
     #        data_root,
@@ -162,16 +163,17 @@ def main():
     else:
         backbone_path = None
 
+    print(backbone_path)
     # if args.network == "progressnet":
-        network = ProgressNet(
-            args.pooling_layers,
-            args.roi_size,
-            args.dropout_chance,
-            args.embed_dim,
-            args.finetune,
-            args.backbone,
-            backbone_path,
-        )
+    network = ProgressNet(
+        args.pooling_layers,
+        args.roi_size,
+        args.dropout_chance,
+        args.embed_dim,
+        args.finetune,
+        args.backbone,
+        backbone_path,
+    )
     # else:
     #     raise Exception(f"Network {args.network} does not exist")
 

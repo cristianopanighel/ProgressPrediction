@@ -121,4 +121,5 @@ def wandb_init(args):
         project=args.wandb_project,
         name=args.wandb_name,
         config=args,
+        settings=wandb.Settings(start_method="fork")
     )

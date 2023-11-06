@@ -2,9 +2,11 @@
 .DS_Store
 .cache
 __pycache__/
+
 .vscode
 wandb
 data
+plots/
 
 *.err
 *.out

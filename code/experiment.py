@@ -17,6 +17,8 @@ def get_device() -> torch.device:
         device = "cuda"
     else:
         device = "cpu"
+    #torch.backends.cudnn.enabled = False
+    # print("CUDA? " + str(torch.cuda.is_available()))
     return torch.device(device)
 
 

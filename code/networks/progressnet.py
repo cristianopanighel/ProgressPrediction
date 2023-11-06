@@ -26,6 +26,8 @@ class ProgressNet(nn.Module):
             self.device = "cuda"
         else:
             self.device = "cpu"
+        #torch.backends.cudnn.enabled = False
+        # print("CUDA? " + str(torch.cuda.is_available()))
         if backbone == "vgg16":
             self.backbone = models.vgg16().features
         elif backbone == "vgg11":
