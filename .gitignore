@@ -12,3 +12,5 @@ plots/
 *.out
 
 *.pyc
+
+.env

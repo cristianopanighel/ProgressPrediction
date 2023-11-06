@@ -1,11 +1,8 @@
 import os
 import torch
 import torch.nn as nn
-import seaborn as sns
 import matplotlib.pyplot as plt
 from torchvision import transforms
-import random
-import scipy.io
 from dotenv import load_dotenv
 
 from datasets import FeatureDataset, ImageDataset
@@ -83,78 +80,6 @@ def ucf_baseline():
     )
     losses = calc_baseline(trainset.lengths, testset.lengths)
     print(f"--- ucf ---")
-    print("average", losses[0])
-    print("0.5", losses[1])
-    print("random", losses[2])
-
-
-def cholec_baseline():
-    losses = [0, 0, 0]
-    for i in range(4):
-        trainset = FeatureDataset(
-            os.path.join(DATA_ROOT, "cholec80"),
-            "features/resnet152_0",
-            f"t12_{i}.txt",
-            False,
-            1, False,
-            False,
-            1,
-            "none",
-            1,
-        )
-        testset = FeatureDataset(
-            os.path.join(DATA_ROOT, "cholec80"),
-            "features/resnet152_0",
-            f"t12_{i}.txt",
-            False,
-            1, False,
-            False,
-            1,
-            "none",
-            1,
-        )
-
-        for i, loss in enumerate(
-            calc_baseline(trainset, testset)
-        ):
-            print(loss)
-            losses[i] += loss / 4
-    print(f"--- cholec ---")
-    print("average", losses[0])
-    print("0.5", losses[1])
-    print("random", losses[2])
-
-    losses = [0, 0, 0]
-    for i in range(4):
-        trainset = FeatureDataset(
-            os.path.join(DATA_ROOT, "cholec80"),
-            "features/resnet152_0",
-            f"t12_{i}.txt",
-            False,
-            10, False,
-            False,
-            1,
-            "none",
-            1,
-        )
-        testset = FeatureDataset(
-            os.path.join(DATA_ROOT, "cholec80"),
-            "features/resnet152_0",
-            f"e_{i}.txt",
-            False,
-            10, False,
-            False,
-            1,
-            "none",
-            1,
-        )
-
-        for i, loss in enumerate(
-            calc_baseline(trainset, testset)
-        ):
-            print(loss)
-            losses[i] += loss / 4
-    print(f"--- cholec (sampled) ---")
     print("average", losses[0])
     print("0.5", losses[1])
     print("random", losses[2])
