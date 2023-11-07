@@ -1,14 +1,37 @@
 *.pth
-.DS_Store
-.cache
-__pycache__/
 
-.vscode
+# macOS dir files
+.DS_Store
+
+# Visual Studio Code files
+/.vscode/*
+.vs
+!/.vscode/extensions.json
+!/.vscode/settings_recommended.json
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*/*.pyc
+*/**/__pycache__
+*/**/*.py[cod]
+*/**/**/*.pyc
+*/**/**/**/*.pyc
+*/**/**/**/**/*.pyc
+
+# Unit test / coverage reports
+.cache
+
+# pyenv
+.python-version
+
+# Environments
+.env
+
+# General
 wandb
 data
 plots/
 
 *.err
 *.out
-
-*.pyc
