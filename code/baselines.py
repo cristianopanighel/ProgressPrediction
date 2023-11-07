@@ -1,11 +1,10 @@
 import os
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 from torchvision import transforms
 from dotenv import load_dotenv
 
-from datasets import FeatureDataset, ImageDataset
+from datasets import FeatureDataset, ImageDataset, UCFDataset
 
 load_dotenv()
 DATA_ROOT = os.environ.get('MAIN')
@@ -56,27 +55,35 @@ def calc_baseline(train_lengths, test_lengths):
 
 
 def ucf_baseline():
-    trainset = FeatureDataset(
+    trainset = UCFDataset(
         os.path.join(DATA_ROOT, "ucf24"),
-        "labels",  # data_dir feature/resnet?
+        "rgb-images",
         "train.txt",
+        True,
         False,
-        1, False,
+        1,
+        False,
         False,
         1,
         "none",
         1,
+        None,
+        None
     )
-    testset = FeatureDataset(
+    testset = UCFDataset(
         os.path.join(DATA_ROOT, "ucf24"),
-        "labels",
+        "rgb-images",
         "test.txt",
+        True,
         False,
-        1, False,
+        1,
+        False,
         False,
         1,
         "none",
         1,
+        None,
+        None
     )
     losses = calc_baseline(trainset.lengths, testset.lengths)
     print(f"--- ucf ---")
@@ -156,11 +163,15 @@ def bars_baseline():
                          f"train.txt", False, 1, False, False, 1, False)
     test = ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images",
                         f"test.txt", False, 1, False, False, 1, False)
-    print(calc_baseline(train.lengths, test.lengths))
+    losses = calc_baseline(train.lengths, test.lengths)
+    print(f"--- bars ---")
+    print("average", losses[0])
+    print("0.5", losses[1])
+    print("random", losses[2])
 
 
 def main():
-    # bars_baseline()
+    bars_baseline()
     ucf_baseline()
     # cholec_baseline()
     # bf_baseline()
