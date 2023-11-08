@@ -95,27 +95,27 @@ def ucf_baseline():
 def bf_baseline():
     losses = [0, 0, 0]
     for i in range(1, 5):
-        trainset = FeatureDataset(
+        trainset = ImageDataset(
             os.path.join(DATA_ROOT, "breakfast"),
-            "features/dense_trajectories",
+            "rgb-images",
             f"train_s{i}.txt",
             False,
-            1, False,
+            1,
+            False,
             False,
             1,
-            "none",
-            1,
-        )
-        testset = FeatureDataset(
+            False
+            )
+        testset = ImageDataset(
             os.path.join(DATA_ROOT, "breakfast"),
-            "features/dense_trajectories",
+            "rgb-images",
             f"test_s{i}.txt",
             False,
-            1, False,
+            1,
+            False,
             False,
             1,
-            "none",
-            1,
+            False
         )
         for i, loss in enumerate(calc_baseline(trainset, testset)):
             losses[i] += loss / 4
@@ -125,29 +125,29 @@ def bf_baseline():
     print("0.5", losses[1])
     print("random", losses[2])
 
+    # Change value of subsample_fps
     losses = [0, 0, 0]
     for i in range(1, 5):
-        trainset = FeatureDataset(
+        trainset = ImageDataset(
             os.path.join(DATA_ROOT, "breakfast"),
-            "features/dense_trajectories",
+            "rgb-images",
             f"train_s{i}.txt",
             False,
-            15, False,
+            15,
+            False,
             False,
             1,
-            "none",
-            1,
+            False
         )
-        testset = FeatureDataset(
-            os.path.join(DATA_ROOT, "breakfast"),
-            "features/dense_trajectories",
+        testset = ImageDataset(
+            "rgb-images",
             f"test_s{i}.txt",
             False,
-            15, False,
+            15,
+            False,
             False,
             1,
-            "none",
-            1,
+            False
         )
         for i, loss in enumerate(calc_baseline(trainset, testset)):
             losses[i] += loss / 4
@@ -173,7 +173,6 @@ def bars_baseline():
 def main():
     bars_baseline()
     ucf_baseline()
-    # cholec_baseline()
     # bf_baseline()
 
 
