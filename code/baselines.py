@@ -10,13 +10,6 @@ load_dotenv()
 DATA_ROOT = os.environ.get('MAIN')
 
 
-def get_datasetset_lengths(dataset):
-    lengths = []
-    for item in dataset:
-        lengths.append(item[1].shape[0])
-    return lengths
-
-
 def calc_baseline(train_lengths, test_lengths):
 
     max_length = max(train_lengths)
@@ -67,8 +60,6 @@ def ucf_baseline():
         1,
         "none",
         1,
-        None,
-        None
     )
     testset = UCFDataset(
         os.path.join(DATA_ROOT, "ucf24"),
@@ -82,8 +73,6 @@ def ucf_baseline():
         1,
         "none",
         1,
-        None,
-        None
     )
     losses = calc_baseline(trainset.lengths, testset.lengths)
     print(f"--- ucf ---")
@@ -105,7 +94,7 @@ def bf_baseline():
             False,
             1,
             False
-            )
+        )
         testset = ImageDataset(
             os.path.join(DATA_ROOT, "breakfast"),
             "rgb-images",
@@ -117,9 +106,32 @@ def bf_baseline():
             1,
             False
         )
-        for i, loss in enumerate(calc_baseline(trainset, testset)):
-            losses[i] += loss / 4
-
+        # trainset = FeatureDataset(
+        #    os.path.join(DATA_ROOT, "breakfast"),
+        #    "features",
+        #    f"train_s{i}.txt",
+        #    False,
+        #    1,
+        #    False,
+        #    False,
+        #    1,
+        #    "none",
+        #    1,
+        # )
+        # testset = FeatureDataset(
+        #    os.path.join(DATA_ROOT, "breakfast"),
+        #    "features",
+        #    f"train_s{i}.txt",
+        #    False,
+        #    1,
+        #    False,
+        #    False,
+        #    1,
+        #    "none",
+        #    1,
+        # )
+    for i, loss in enumerate(calc_baseline(trainset.lengths, testset.lengths)):
+        losses[i] += float(loss.split()[1]) / 4
     print(f"--- bf all ---")
     print("average", losses[0])
     print("0.5", losses[1])
@@ -140,6 +152,7 @@ def bf_baseline():
             False
         )
         testset = ImageDataset(
+            os.path.join(DATA_ROOT, "breakfast"),
             "rgb-images",
             f"test_s{i}.txt",
             False,
@@ -149,9 +162,32 @@ def bf_baseline():
             1,
             False
         )
-        for i, loss in enumerate(calc_baseline(trainset, testset)):
-            losses[i] += loss / 4
-
+    # trainset = FeatureDataset(
+    #    os.path.join(DATA_ROOT, "breakfast"),
+    #    "features",
+    #    f"train_s{i}.txt",
+    #    False,
+    #    15,
+    #    False,
+    #    False,
+    #    1,
+    #    "none",
+    #    1,
+    # )
+    # testset = FeatureDataset(
+    #    os.path.join(DATA_ROOT, "breakfast"),
+    #    "features",
+    #    f"train_s{i}.txt",
+    #    False,
+    #    15,
+    #    False,
+    #    False,
+    #    1,
+    #    "none",
+    #    1,
+    # )
+    for i, loss in enumerate(calc_baseline(trainset.lengths, testset.lengths)):
+        losses[i] += float(loss.split()[1]) / 4
     print(f"--- bf all (sampled) ---")
     print("average", losses[0])
     print("0.5", losses[1])
@@ -173,7 +209,7 @@ def bars_baseline():
 def main():
     bars_baseline()
     ucf_baseline()
-    # bf_baseline()
+    bf_baseline()
 
 
 if __name__ == "__main__":

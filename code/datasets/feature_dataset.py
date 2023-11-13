@@ -51,15 +51,22 @@ class FeatureDataset(Dataset):
         data = []
         lengths = []
         all_data = []
-        for video_name in tqdm(self.splitnames):
-            print(video_name)
+        # for video_name in tqdm(self.splitnames):
+        #     print(video_name)
         for video_name in tqdm(self.splitnames):
             path = os.path.join(root, f"{video_name}.txt")
-            with open(path) as f:
-                video_data = f.readlines()
+            # with open(path, 'r') as f:
+            #    video_data = f.readlines()
+            video_data = []
+            with open(path) as file:
+                while line := file.readline():
+                    # print(line.rstrip())
+                    video_data.append(line.rstrip())
+
             # path = os.path.join(root, f"{video_name}.npy")
             # with open(path, 'rb') as f:
             #     video_data = np.load(f)
+
             # TODO: Video subsampling
             video_data = torch.FloatTensor(
                 [list(map(float, row.split(" "))) for row in video_data]

@@ -107,7 +107,7 @@ class ImageDataset(Dataset):
                     frame = torch.full_like(
                         frame, index) / self.indices_normalizer
                 frames.append(frame)
-                # frame.close()
+                frame.close()
 
             if self.transform:
                 frames = torch.stack(frames)

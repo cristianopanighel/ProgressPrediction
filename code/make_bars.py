@@ -21,7 +21,7 @@ def parse_args():
 
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--root', type=str, default=os.environ.get("MAIN"))
-    parser.add_argument('--save_dir', type=str, default='bars')
+    parser.add_argument('--save_dir', type=str, default='bars')  # ucf24
 
     parser.add_argument('--num_videos', type=int, default=1000)
     parser.add_argument('--actions_per_video', type=int, default=4)
@@ -105,14 +105,18 @@ def visualise(args):
     data_dir = os.path.join(args.root, args.save_dir, 'rgb-images')
     video_names = sorted(os.listdir(data_dir))
     os.makedirs("./plots/bars/", exist_ok=True)
+    # os.makedirs("./plots/ucf24/", exist_ok=True)
     # video_names = [video_names[0], video_names[4], video_names[5], video_names[45]]
     video_names = [video_names[1]]
 
     frames_per_video = {}
     max_num_frames = 0
     for video_name in video_names:
-        video_path = os.path.join(data_dir, video_name)
-        num_frames = len(os.listdir(video_path))
+        if '.DS_Store' in video_name:
+            continue
+        else:
+            video_path = os.path.join(data_dir, video_name)
+            num_frames = len(os.listdir(video_path))
 
         frames_per_video[video_name] = num_frames
         max_num_frames = max(num_frames, max_num_frames)
@@ -121,9 +125,13 @@ def visualise(args):
         frames = []
         progress = []
         for video_name in video_names:
+            # only for ucf24
+            # i = i+1
             frame_index = min(i, frames_per_video[video_name] - 1)
             frame_path = os.path.join(
                 data_dir, video_name, f'{frame_index:05d}.jpg')
+            print("frame path: " + str(frame_path))
+            print("index: " + str(i))
             frames.append(read_image(frame_path))
             progress.append((i + 1) / frames_per_video[video_name])
         fig, axs = plt.subplots(1, 1, figsize=(2.5, 2.5))
@@ -140,21 +148,30 @@ def visualise(args):
         plt.tight_layout()
         plt.savefig(f'./plots/bars/{i:03d}.jpg')
         plt.savefig(f'./plots/bars/{i:03d}.pdf')
+        # only for ucf24
+        # plt.savefig(f'./plots/ucf24/{i:03d}.jpg')
+        # plt.savefig(f'./plots/ucf24/{i:03d}.pdf')
+
         plt.clf()
 
     subprocess.call([
         'ffmpeg', '-framerate', '6', '-i', './plots/bars/%03d.jpg', '-r', '30', '-pix_fmt', 'yuv420p',
         './plots/bars/out.mp4'
     ])
+    # only for ucf24
+    # subprocess.call([
+    #    'ffmpeg', '-framerate', '6', '-i', './plots/ucf24/%03d.jpg', '-r', '30', '-pix_fmt', 'yuv420p',
+    #    './plots/ucf24/out.mp4'
+    # ])
 
 
 def main():
     args = parse_args()
     random.seed(args.seed)
-    if args.visualise:
-        visualise(args)
-    else:
-        create_data(args)
+    # if args.visualise:
+    visualise(args)
+    # else:
+    #    create_data(args)
 
 
 if __name__ == '__main__':
