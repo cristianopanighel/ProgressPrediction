@@ -1,5 +1,37 @@
-python main.py \
+#!/bin/sh
+### job name
+#SBATCH --job-name=pn_bars_1
+
+###
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=cristiano.panighel@studenti.unipd.it
+
+### Standard output and error
+#SBATCH --error=pn_bars_1.err
+#SBATCH --output=pn_bars_1.out
+
+### Number of tasks
+#SBATCH --ntasks=1
+
+### RAM requirement
+#SBATCH --mem=16G
+
+### Time limit for the job
+#SBATCH --begin=now
+
+### GPU request
+#SBATCH --gres=gpu
+#SBATCH --constraint=cudadrv510
+
+#SBATCH --qos=short
+#SBATCH --cpus-per-task=2
+
+wandb offline
+python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
+    --experiment_name pn_bars_1 \
+    --wandb_name pn_bars_1 \
+    --wandb_project pn_bars_1 \
     --dataset bars \
     --data_dir rgb-images \
     --train_split 1.txt \

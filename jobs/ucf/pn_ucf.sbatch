@@ -17,7 +17,6 @@
 #SBATCH --mem=32G
 
 ### Time limit for the job
-#SBATCH --time=32:00:00
 #SBATCH --begin=now
 
 ### GPU request
@@ -25,11 +24,11 @@
 #SBATCH --constraint=cudadrv510
 
 #SBATCH --qos=medium
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=2
 
 wandb offline
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:32
-python main.py \
+python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
     --experiment_name pn_ucf \
     --wandb_name pn_ucf \

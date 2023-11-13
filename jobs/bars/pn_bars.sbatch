@@ -14,10 +14,9 @@
 #SBATCH --ntasks=1
 
 ### RAM requirement
-#SBATCH --mem=8G
+#SBATCH --mem=16G
 
 ### Time limit for the job
-#SBATCH --time=1:00:00
 #SBATCH --begin=now
 
 ### GPU request
@@ -25,13 +24,14 @@
 #SBATCH --constraint=cudadrv510
 
 #SBATCH --qos=short
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=2
 
 wandb offline
 python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
     --experiment_name pn_bars \
-    --wandb_name pn_bars --wandb_project pn_bars \
+    --wandb_name pn_bars \
+    --wandb_project pn_bars \
     --dataset bars \
     --data_dir rgb-images \
     --train_split train.txt \

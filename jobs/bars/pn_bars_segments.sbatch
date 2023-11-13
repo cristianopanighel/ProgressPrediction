@@ -1,22 +1,37 @@
 #!/bin/sh
+### job name
+#SBATCH --job-name=pn_bars_segment
 
-#SBATCH --partition=general
-#SBATCH --qos=short
-#SBATCH --time=2:00:00
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=8G
+###
 #SBATCH --mail-type=ALL
-#SBATCH --gres=gpu:a40
+#SBATCH --mail-user=cristiano.panighel@studenti.unipd.it
 
-module use /opt/insy/modulefiles
-module load cuda/10.0 cudnn/10.0-7.4.2.24
+### Standard output and error
+#SBATCH --error=pn_bars_segment.err
+#SBATCH --output=pn_bars_segment.out
 
-srun python /home/nfs/fransdeboer/mscfransdeboer/code/main.py \
+### Number of tasks
+#SBATCH --ntasks=1
+
+### RAM requirement
+#SBATCH --mem=8G
+
+### Time limit for the job
+#SBATCH --begin=now
+
+### GPU request
+#SBATCH --gres=gpu
+#SBATCH --constraint=cudadrv510
+
+#SBATCH --qos=short
+#SBATCH --cpus-per-task=2
+
+wandb offline
+python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
-    --experiment_name pn_bars_segments_vgg11 \
-    --wandb_group segments \
-    --wandb_tags vgg11 \
+    --experiment_name pn_bars_segment \
+    --wandb_name pn_bars_segment \
+    --wandb_project pn_bars_segment \
     --dataset bars \
     --data_dir rgb-images \
     --train_split train.txt \

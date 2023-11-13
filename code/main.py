@@ -34,8 +34,6 @@ def main():
     # root can be set manually, but can also be obtained automatically so wandb sweeps work properly
     if args.root is not None:
         root = args.root
-    # elif "nfs" in os.getcwd():
-    #    root = "/tudelft.net/staff-umbrella/StudentsCVlab/fransdeboer/"
     else:
         root = os.environ.get('MAIN')
     data_root = os.path.join(root, args.dataset)
