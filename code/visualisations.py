@@ -66,18 +66,18 @@ if not os.path.isfile('./data/lengths.json'):
         'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
         'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
     }
-    print('loading cholec80')
-    cholec80 = {
-        'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"all_0.txt").lengths),
-        'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"t12_{i}.txt").lengths) for i in range(4)],
-        'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"e_{i}.txt").lengths) for i in range(4)],
-    }
-    print('loading breakfast')
-    breakfast = {
-        'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
-        'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
-        'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
-    }
+    # print('loading cholec80')
+    # cholec80 = {
+    #    'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"all_0.txt").lengths),
+    #    'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"t12_{i}.txt").lengths) for i in range(4)],
+    #    'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"e_{i}.txt").lengths) for i in range(4)],
+    # }
+    # print('loading breakfast')
+    # breakfast = {
+    #    'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
+    #    'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
+    #    'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
+    # }
     print('loading bars')
     bars = {
         'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"all.txt").lengths),
@@ -87,16 +87,16 @@ if not os.path.isfile('./data/lengths.json'):
     with open('./data/lengths.json', 'w+') as f:
         json.dump({
             'ucf101': ucf101,
-            'cholec80': cholec80,
-            'breakfast': breakfast,
+            # 'cholec80': cholec80,
+            # 'breakfast': breakfast,
             'bars': bars
         }, f)
 else:
     with open('./data/lengths.json') as f:
         data = json.load(f)
     ucf101 = data['ucf101']
-    cholec80 = data['cholec80']
-    breakfast = data['breakfast']
+    # cholec80 = data['cholec80']
+    # breakfast = data['breakfast']
     bars = data['bars']
 
 # Helper functions
@@ -244,27 +244,28 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
 
 
 def plot_baselines():
-    c80_predictions, c80_index_loss, c80_static_loss, c80_random_loss = calculate_average_baseline(
-        cholec80['train'], cholec80['test'])
-    bf_predictions, bf_index_loss, bf_static_loss, bf_random_loss = calculate_average_baseline(
-        breakfast['train'], breakfast['test'])
+    # c80_predictions, c80_index_loss, c80_static_loss, c80_random_loss = calculate_average_baseline(
+    #     cholec80['train'], cholec80['test'])
+    # bf_predictions, bf_index_loss, bf_static_loss, bf_random_loss = calculate_average_baseline(
+    #     breakfast['train'], breakfast['test'])
     ucf_predictions, ucf_index_loss, ucf_static_loss, ucf_random_loss = calculate_average_baseline(
         ucf101['train'], ucf101['test'])
-    print('c80', c80_index_loss, c80_static_loss, c80_random_loss)
-    print('bf', bf_index_loss, bf_static_loss, bf_random_loss)
+    # print('c80', c80_index_loss, c80_static_loss, c80_random_loss)
+    # print('bf', bf_index_loss, bf_static_loss, bf_random_loss)
     print('ucf', ucf_index_loss, ucf_static_loss, ucf_random_loss)
 
-    figure, axs = plt.subplots(1, 3, figsize=(19.2, 4.8 * 1.3))
+    # figure, axs = plt.subplots(1, 3, figsize=(19.2, 4.8 * 1.3))
+    figure, axs = plt.subplots(1, 1, figsize=(19.2, 4.8 * 1.3))
     axs[0].plot(ucf_predictions, label="average-index")
-    axs[1].plot(c80_predictions, label="average-index")
-    axs[2].plot(bf_predictions, label="average-index")
+    # axs[1].plot(c80_predictions, label="average-index")
+    # axs[2].plot(bf_predictions, label="average-index")
 
     with open('./data/ucf_baseline.txt', 'w+') as f:
         f.write('\n'.join([str(val) for val in ucf_predictions.tolist()]))
-    with open('./data/cholec_baseline.txt', 'w+') as f:
-        f.write('\n'.join([str(val) for val in c80_predictions.tolist()]))
-    with open('./data/bf_baseline.txt', 'w+') as f:
-        f.write('\n'.join([str(val) for val in bf_predictions.tolist()]))
+    # with open('./data/cholec_baseline.txt', 'w+') as f:
+    #    f.write('\n'.join([str(val) for val in c80_predictions.tolist()]))
+    # with open('./data/bf_baseline.txt', 'w+') as f:
+    #    f.write('\n'.join([str(val) for val in bf_predictions.tolist()]))
 
     for ax in axs.flat:
         ax.set_xlabel("Frame")
@@ -275,16 +276,16 @@ def plot_baselines():
         y=TITLE_Y_OFFSET / 1.2,
         x=TITLE_X_OFFSET,
     )
-    axs[1].set_title(
-        "(b) Average-index baseline on Cholec80",
-        y=TITLE_Y_OFFSET / 1.2,
-        x=TITLE_X_OFFSET,
-    )
-    axs[2].set_title(
-        "(c) Average-index baseline on breakfast",
-        y=TITLE_Y_OFFSET / 1.2,
-        x=TITLE_X_OFFSET,
-    )
+    # axs[1].set_title(
+    #    "(b) Average-index baseline on Cholec80",
+    #    y=TITLE_Y_OFFSET / 1.2,
+    #    x=TITLE_X_OFFSET,
+    # )
+    # axs[2].set_title(
+    #    "(c) Average-index baseline on breakfast",
+    #    y=TITLE_Y_OFFSET / 1.2,
+    #    x=TITLE_X_OFFSET,
+    # )
 
     plt.tight_layout()
     plt.savefig(f"./plots/avg_index_baseline.{FILE}")
@@ -345,13 +346,14 @@ def make_length_plot(lengths, ax: plt.Axes, title: str, bucket_size: int = 10):
 
 
 def plot_dataset_lengths():
-    figure, axs = plt.subplots(1, 3, figsize=(6.4 * 2, 4.4))
+    # figure, axs = plt.subplots(1, 3, figsize=(6.4 * 2, 4.4))
+    figure, axs = plt.subplots(1, 1, figsize=(6.4 * 2, 4.4))
     make_length_plot(
         ucf101['all'], axs[0], '(a) video length distribution for UCF101-24', bucket_size=10)
-    make_length_plot(
-        cholec80['all'], axs[1], '(b) video length distribution for Cholec80', bucket_size=100)
-    make_length_plot(
-        breakfast['all'], axs[2], '(c) video length distribution for breakfast', bucket_size=100)
+    # make_length_plot(
+    #     cholec80['all'], axs[1], '(b) video length distribution for Cholec80', bucket_size=100)
+    # make_length_plot(
+    #     breakfast['all'], axs[2], '(c) video length distribution for breakfast', bucket_size=100)
     # make_length_plot(bars['all'], axs[3], '(d) video length distribution for synthetic dataset', bucket_size=10)
     for ax in axs.flat:
         ax.set_xlabel("Video Length")
@@ -472,8 +474,17 @@ def stats(dataset: str, splitfiles: List[str], length=False):
 
 
 def tube_stats(splitfile: str):
-    dataset = FeatureDataset(os.path.join(
-        DATA_ROOT, 'ucf24'), 'features/resnet152', splitfile, False, 1, False, False, 1, 'none', 1)
+    dataset = UCFDataset(os.path.join(DATA_ROOT, "ucf24"),
+                         "rgb-images",
+                         splitfile,
+                         True,
+                         False,
+                         1,
+                         False,
+                         False,
+                         1,
+                         "none",
+                         1,)
     counts_per_class = {}
     num_frames_per_class = {}
     total = 0
@@ -507,42 +518,8 @@ def dataset_statistics():
     stats('breakfast', ['all'], length=True)
 
 
-def surgery_duration():
-    durations = [num_frames / 60 for num_frames in cholec80['all']]
-
-    buckets = {}
-    q1 = np.percentile(durations, 25)
-    mean = np.percentile(durations, 50)
-    q3 = np.percentile(durations, 65)
-    for length in durations:
-        length = math.floor(length / 10) * 10
-        if length not in buckets:
-            buckets[length] = 0
-        buckets[length] += 1
-
-    plt.rcParams['axes.linewidth'] = 0.4
-    plt.figure(figsize=(6.8, 4.1))
-    plt.bar([5+key for key in buckets.keys()], buckets.values(),
-            width=10, edgecolor='black', linewidth=0.75, color='#75a9d3')
-    plt.xlabel('Surgery duration (minute)')
-    plt.ylabel('# of surgeries')
-    plt.axvline(q1, color='blue', linestyle='-.', linewidth=1)
-    plt.axvline(q3, color='blue', linestyle='-.', linewidth=1)
-    plt.xticks([i*10 for i in range(12)])
-    plt.yticks([i*5 for i in range(9)])
-    plt.tick_params(axis='y', direction='in', length=4,
-                    left=True, right=True, width=0.4)
-    plt.tick_params(axis='x', direction='in', length=4,
-                    bottom=True, top=True, width=0.4)
-    # title = title + f'\nQ1={round(q1)}, mean={round(mean)}, Q3={round(q3)}'
-    plt.tight_layout()
-    plt.savefig('./plots/cholec80_durations.pdf')
-    plt.rcParams['axes.linewidth'] = 0.8
-
-
 def dataset_visualisations():
     transform = transforms.Resize((240, 320))
-    # dataset = ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"small.txt", sample_transform=Middle())
     dataset = UCFDataset(os.path.join(DATA_ROOT, "ucf24"),
                          "rgb-images", f"small.txt", sample_transform=Middle())
     num_activities = len(dataset) // 10
@@ -572,57 +549,25 @@ def dataset_visualisations():
     # ucf101_small = UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"small.txt")
 
 
-def cholec_visualisations():
-    # transform = transforms.Resize((240, 320))
-    transform = transforms.Compose([])
-    dataset = ImageDataset(os.path.join(
-        DATA_ROOT, "cholec80"), "rgb-images", f"v_0.txt", sample_transform=Middle())
-
-    frames = []
-    fig, axs = plt.subplots(1, 6, figsize=(6.4, 4.8 / 5))
-    for name, frame, _ in dataset:
-        frames.append(transform(frame[0]))
-    for (frame, ax) in zip(frames, axs.flat):
-        ax.imshow(frame)
-        # ax.axis('off')
-        ax.set_xticks([])
-        ax.set_xticks([], minor=True)
-        ax.set_yticks([])
-        ax.set_yticks([], minor=True)
-    # for (unique_name, ax) in zip(unique_names, axs[:, 0]):
-    #     ax.axis('off')
-    #     ax.text(0, 0, unique_name)
-        # ax.set_aspect('equal')
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0.1, hspace=0.1)
-    plt.savefig('./plots/c80_visualisations.pdf')
-
-
 def visualise_results():
-    for index, timestamps in zip(['04', '05'], [(210, 1250), (200, 1650)]):
-        visualise_video(
-            os.path.join(
-                DATA_ROOT, f'cholec80/rgb-images/video{index}'), timestamps,
-            [('ResNet-2D', f'./data/cholec/resnet_cholec/video{index}.txt', ':'),
-             ('ResNet-LSTM',
-              f'./data/cholec/lstm_cholec/video{index}.txt', ':'),
-
-             ('UTE', f'./data/cholec/ute_cholec/video{index}.txt', '-.'),
-             ('RSDNet', f'./data/cholec/rsd_cholec/video{index}.txt', '-.'),
-             ('ProgressNet',
-              f'./data/cholec/pn_cholec/video{index}.txt', '-.'),
-             ('average-index', f'./data/cholec_baseline.txt', '-')],
-            f'cholec80_video{index}', 200
-        )
+    # for index, timestamps in zip(['04', '05'], [(210, 1250), (200, 1650)]):
+    #    visualise_video(
+    #        os.path.join(
+    #            DATA_ROOT, f'cholec80/rgb-images/video{index}'), timestamps,
+    #        [('ResNet-2D', f'./data/cholec/resnet_cholec/video{index}.txt', ':'),
+    #         ('ResNet-LSTM',
+    #          f'./data/cholec/lstm_cholec/video{index}.txt', ':'),
+    #         ('UTE', f'./data/cholec/ute_cholec/video{index}.txt', '-.'),
+    #         ('RSDNet', f'./data/cholec/rsd_cholec/video{index}.txt', '-.'),
+    #         ('ProgressNet',
+    #          f'./data/cholec/pn_cholec/video{index}.txt', '-.'),
+    #         ('average-index', f'./data/cholec_baseline.txt', '-')],
+    #        f'cholec80_video{index}', 200
+    #    )
     for index, timestamp in zip(['00015'], [(10, 55)]):
         visualise_video(
             os.path.join(DATA_ROOT, f'bars/rgb-images/{index}'), timestamp,
-            [('ResNet', f'./data/bars/resnet_bars/{index}.txt', ':'),
-             ('ResNet-LSTM', f'./data/bars/lstm_bars/{index}.txt', ':'),
-
-             ('UTE', f'./data/bars/ute_bars/{index}.txt', '-.'),
-             ('RSDNet', f'./data/bars/rsd_bars/{index}.txt', '-.'),
-             ('ProgressNet', f'./data/bars/pn_bars/{index}.txt', '-.')],
+            [('ProgressNet', f'./data/bars/pn_bars/{index}.txt', '-.')],
             f'bars_video{index}', 1
         )
     # # 0, 122, 0, 0, 0
@@ -663,17 +608,16 @@ def main():
     # plot_baseline_example()
     # return
     dataset_visualisations()
-    cholec_visualisations()
     set_font_sizes(16, 18, 20)
     visualise_results()
     set_font_sizes()
     # result plots
     results = load_results('./results.json')
-    for dataset in ["UCF101-24", "Cholec80", "breakfast"]:
-        plot_result_bar(results, dataset, [
-                        "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
-        plot_result_bar(results, dataset, [
-                        "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
+    # for dataset in ["UCF101-24", "breakfast"]:
+    #     plot_result_bar(results, dataset, [
+    #                     "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
+    #     plot_result_bar(results, dataset, [
+    #                     "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
     plot_result_bar(results, "Bars", [
                     "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
     # average index baseline
@@ -688,11 +632,6 @@ def main():
     # example progress predictions
     set_font_sizes(16, 18, 20)
     visualise_results()
-
-    # dataset_statistics()
-    # plot_dataset_lengths()
-    set_font_sizes(9, 10, 12)
-    surgery_duration()
 
 
 if __name__ == '__main__':
