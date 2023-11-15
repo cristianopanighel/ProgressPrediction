@@ -100,14 +100,13 @@ class ImageDataset(Dataset):
             frame_paths = np.array(frame_paths)
             frame_paths = frame_paths[indices]
             for index, path in zip(indices, frame_paths):
-                frame = Image.open(path)
-                if self.transform:
-                    frame = self.transform(frame)
-                if self.indices:
-                    frame = torch.full_like(
-                        frame, index) / self.indices_normalizer
-                frames.append(frame)
-                frame.close()
+                with Image.open(path) as frame:
+                    if self.transform:
+                        frame = self.transform(frame)
+                    if self.indices:
+                        frame = torch.full_like(
+                            frame, index) / self.indices_normalizer
+                    frames.append(frame)
 
             if self.transform:
                 frames = torch.stack(frames)
