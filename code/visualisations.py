@@ -60,12 +60,13 @@ def set_spines(enable: bool):
 
 # Datasets
 if not os.path.isfile('./data/lengths.json'):
-    print('loading ucf101')
-    ucf101 = {
-        'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
-        'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
-        'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
-    }
+    os.makedirs('./data/', exist_ok=True)
+    # print('loading ucf101')
+    # ucf101 = {
+    #     'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
+    #     'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
+    #     'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
+    # }
     # print('loading cholec80')
     # cholec80 = {
     #    'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"all_0.txt").lengths),
@@ -86,7 +87,7 @@ if not os.path.isfile('./data/lengths.json'):
     }
     with open('./data/lengths.json', 'w+') as f:
         json.dump({
-            'ucf101': ucf101,
+            # 'ucf101': ucf101,
             # 'cholec80': cholec80,
             # 'breakfast': breakfast,
             'bars': bars
@@ -167,23 +168,24 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
     plt.figure(figsize=(7.2, 5.2))
 
     data = [[] for _ in modes]
+    # xs_indices, networks = zip(
+    #     *[(i, key) for i, key in enumerate(results[dataset]) if key not in BASELINES])
     networks = [key for key in results[dataset] if key not in BASELINES]
-    xs_indices = np.array([0, 1, 3, 4, 5])
+    xs_indices = np.array([0])
     for network in networks:
-        if network in BASELINES:
-            continue
         for i, mode in enumerate(modes):
             if mode in results[dataset][network]:
                 data[i].append(results[dataset][network][mode])
             else:
                 data[i].append(0)
-
     for i, (values, mode) in enumerate(zip(data, modes)):
         bar_xs = xs_indices * SPACING + i * BAR_WIDTH
+        # bar_xs = xs_indices[0] * SPACING + i * BAR_WIDTH
         print(bar_xs, values, mode, dataset)
         plt.bar(bar_xs, values, width=BAR_WIDTH,
                 label=mode, color=MODE_COLOURS[mode])
     xticks = xs_indices * SPACING + BAR_WIDTH * 0.5
+    # xticks = xs_indices[0] * SPACING + BAR_WIDTH * 0.5
     if dataset != 'Bars':
         plt.axhline(
             y=results[dataset]["average-index"]["'full-video' inputs"],
@@ -225,7 +227,9 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
 
     plt.grid(axis='y')
     plt.axhline(y=0, linestyle='-', color='grey', zorder=-1)
-
+    print("xticks " + str(xticks))
+    for el in networks:
+        print("network " + el)
     plt.xticks(xticks, networks)
     if dataset == 'Bars':
         yticks = [0, 1, 2, 3, 4]
@@ -329,9 +333,9 @@ def plot_baseline_example():
 
 def make_length_plot(lengths, ax: plt.Axes, title: str, bucket_size: int = 10):
     buckets = {}
-    q1 = np.percentile(lengths, 25)
-    mean = np.percentile(lengths, 50)
-    q3 = np.percentile(lengths, 65)
+    # q1 = np.percentile(lengths, 25)
+    # mean = np.percentile(lengths, 50)
+    # q3 = np.percentile(lengths, 75)
     for length in lengths:
         length = math.floor(length / bucket_size) * bucket_size
         if length not in buckets:
@@ -339,7 +343,7 @@ def make_length_plot(lengths, ax: plt.Axes, title: str, bucket_size: int = 10):
         buckets[length] += 1
     ax.bar(buckets.keys(), buckets.values(), width=bucket_size)
     # ax.axvline(q1, color='red', linestyle=':')
-    ax.axvline(mean, color='red')
+    # ax.axvline(mean, color='red')
     # ax.axvline(q3, color='red', linestyle=':')
     # title = title + f'\nQ1={round(q1)}, mean={round(mean)}, Q3={round(q3)}'
     ax.set_title(title, y=TITLE_Y_OFFSET*1.1, x=TITLE_X_OFFSET)
@@ -347,14 +351,17 @@ def make_length_plot(lengths, ax: plt.Axes, title: str, bucket_size: int = 10):
 
 def plot_dataset_lengths():
     # figure, axs = plt.subplots(1, 3, figsize=(6.4 * 2, 4.4))
-    figure, axs = plt.subplots(1, 1, figsize=(6.4 * 2, 4.4))
-    make_length_plot(
-        ucf101['all'], axs[0], '(a) video length distribution for UCF101-24', bucket_size=10)
+    figure, axs = plt.subplots(1, 2, figsize=(6.4 * 2, 4.4))
+    # make_length_plot(
+    # ucf101['all'], axs[0], '(a) video length distribution for UCF101-24', bucket_size=10)
     # make_length_plot(
     #     cholec80['all'], axs[1], '(b) video length distribution for Cholec80', bucket_size=100)
     # make_length_plot(
     #     breakfast['all'], axs[2], '(c) video length distribution for breakfast', bucket_size=100)
-    # make_length_plot(bars['all'], axs[3], '(d) video length distribution for synthetic dataset', bucket_size=10)
+    make_length_plot(
+        bars['all'], axs[0], '(d) video length distribution for synthetic dataset', bucket_size=10)
+    make_length_plot(
+        bars['all'], axs[1], '(d) video length distribution for synthetic dataset', bucket_size=10)
     for ax in axs.flat:
         ax.set_xlabel("Video Length")
         ax.set_ylabel("Number of Videos")
@@ -379,7 +386,7 @@ def plot_synthetic(video_index: int, frame_indices: List[int]):
         ax.axis('off')
         progress = (frame_index + 1) / num_frames
         ax.set_title(f'({letter}) \nt={frame_index}\np={round(progress * 100, 1)}%',
-                     y=TITLE_Y_OFFSET * 2.2, x=TITLE_X_OFFSET)
+                     y=TITLE_Y_OFFSET * 2.5, x=TITLE_X_OFFSET)
 
     plt.tight_layout()
     plt.savefig(f'./plots/bars.{FILE}')
@@ -406,10 +413,13 @@ def visualise_video(video_dir: str, timestamps: List[int], result_paths: List[st
         axs[i].set_title(f't={index}', fontsize=20)
 
     ground_truth = [(i+1) / num_frames for i in range(num_frames)]
+    print(ground_truth)
     static = [0.5 for _ in range(num_frames)]
     for index in timestamps:
         axs[-1].axvline(index, color='red', linestyle=':')
     for name, path, linestyle in result_paths:
+        print("path " + path)
+        print("name " + name)
         with open(path) as f:
             data = [float(row.strip()) for row in f.readlines()][:num_frames]
         if name != 'average-index':
@@ -419,6 +429,7 @@ def visualise_video(video_dir: str, timestamps: List[int], result_paths: List[st
             axs[-1].plot(data, label=name, linewidth=LINEWIDTH)
 
     axs[-1].plot(ground_truth, label='Ground Truth', linewidth=LINEWIDTH)
+    axs[-1].plot(static, label='Static', linewidth=LINEWIDTH)
     axs[-1].set_xlabel('Frame')
     axs[-1].set_ylabel('Progress')
     axs[-1].tick_params(axis='both', which='major')
@@ -564,7 +575,9 @@ def visualise_results():
     #         ('average-index', f'./data/cholec_baseline.txt', '-')],
     #        f'cholec80_video{index}', 200
     #    )
-    for index, timestamp in zip(['00015'], [(10, 55)]):
+    os.makedirs(".data/bars/", exist_ok=True)
+    os.makedirs("./data/bars/pn_bars/", exist_ok=True)
+    for index, timestamp in zip(['00015'], [(0, 15)]):
         visualise_video(
             os.path.join(DATA_ROOT, f'bars/rgb-images/{index}'), timestamp,
             [('ProgressNet', f'./data/bars/pn_bars/{index}.txt', '-.')],
@@ -572,14 +585,15 @@ def visualise_results():
         )
     # # 0, 122, 0, 0, 0
     # for index, timestamp, offset in zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [80, 45, 60, 125, 45, 125], [0, 0, 0, 0, 0, 0]):
-    #     visualise_video(
-    #         os.path.join(DATA_ROOT, f'ucf24/rgb-images/{index}'), timestamp,
-    #         [('ProgressNet (full-video)', f'./data/ucf/pn_ucf/{index.replace("/", "_")}_0.txt', '-.'),
-    #          ('ProgressNet (full-video)', f'./data/ucf/pn_ucf_segments/{index.replace("/", "_")}_0.txt', '-.'),
-    #          ('average-index', f'./data/ucf_baseline.txt', '-')],
-    #          f'ucf_video_{index.replace("/", "_")}', 1, offset=offset
-    #     )
-    # for index, timestamp in zip(['pancake/P12/cam01', 'sandwich/P07/webcam01'], [150, 65]):
+    #    visualise_video(
+    #        os.path.join(DATA_ROOT, f'ucf24/rgb-images/{index}'), timestamp,
+    #        [('ProgressNet (full-video)', f'./data/ucf/pn_ucf/{index.replace("/", "_")}_0.txt', '-.'),
+    #         ('ProgressNet (full-video)',
+    #          f'./data/ucf/pn_ucf_segments/{index.replace("/", "_")}_0.txt', '-.'),
+    #         ('average-index', f'./data/ucf_baseline.txt', '-')],
+    #        f'ucf_video_{index.replace("/", "_")}', 1, offset=offset
+    #    )
+    # for index, timestamp in zip(['P12_cam01_P12_pancake', 'P07_webcam01_P07_sandwich'], [150, 65]):
     #     visualise_video(
     #         os.path.join(DATA_ROOT, f'breakfast/rgb-images/{index}'), timestamp,
     #         [('ResNet-LSTM', f'./data/breakfast/lstm_bf_random/{index.replace("/", "_")}.txt', '-.'),
@@ -612,7 +626,7 @@ def main():
     visualise_results()
     set_font_sizes()
     # result plots
-    results = load_results('./results.json')
+    results = load_results('code/results.json')
     # for dataset in ["UCF101-24", "breakfast"]:
     #     plot_result_bar(results, dataset, [
     #                     "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
@@ -628,7 +642,7 @@ def main():
     # dataset statistics
     plot_dataset_lengths()
     # syntethic dataset example
-    plot_synthetic(4, [0, 15, 35, 58, 71])
+    plot_synthetic(4, [0, 3, 7, 11, 15])
     # example progress predictions
     set_font_sizes(16, 18, 20)
     visualise_results()

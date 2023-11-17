@@ -59,7 +59,8 @@ class UCFDataset(Dataset):
                 frame = self.transform(frame)
             if self.indices:
                 frame_index = self.index_to_index[index]
-                frame = torch.full_like(frame, frame_index) / self.indices_normalizer
+                frame = torch.full_like(
+                    frame, frame_index) / self.indices_normalizer
             if self.random:
                 frame = torch.rand_like(frame)
             if self.bounding_boxes and self.rsd_type != 'none':
@@ -85,7 +86,8 @@ class UCFDataset(Dataset):
                 if self.transform:
                     frame = self.transform(frame)
                 if self.indices:
-                    frame = torch.full_like(frame, index) / self.indices_normalizer
+                    frame = torch.full_like(
+                        frame, index) / self.indices_normalizer
                 frames.append(frame)
 
             if self.transform:
@@ -147,10 +149,12 @@ class UCFDataset(Dataset):
                         zip(paths, boxes, progress, rsd)
                     ):
                         data.append(
-                            (f"{video_name}_{tube_index}_{i}", frame_path, box, p, rsd_val)
+                            (f"{video_name}_{tube_index}_{i}",
+                             frame_path, box, p, rsd_val)
                         )
                         self.index_to_index.append(i)
                 else:
-                    data.append((f"{video_name}_{tube_index}", paths, boxes, progress, rsd))
+                    data.append((f"{video_name}_{tube_index}",
+                                paths, boxes, progress, rsd))
                 break
         return data, lengths

@@ -64,35 +64,35 @@ def main():
         transform = transforms.Compose(transform)
 
         if "ucf24" in args.dataset:
-           trainset = UCFDataset(
-               data_root,
-               args.data_dir,
-               args.train_split,
-               args.bboxes,
-               args.flat,
-               args.subsample_fps,
-               args.random,
-               args.indices,
-               args.indices_normalizer,
-               args.rsd_type,
-               args.fps,
-               transform=transform,
-               sample_transform=subsample,
-           )
-           testset = UCFDataset(
-               data_root,
-               args.data_dir,
-               args.test_split,
-               args.bboxes,
-               args.flat,
-               args.subsample_fps,
-               args.random,
-               args.indices,
-               args.indices_normalizer,
-               args.rsd_type,
-               args.fps,
-               transform=transform,
-           )
+            trainset = UCFDataset(
+                data_root,
+                args.data_dir,
+                args.train_split,
+                args.bboxes,
+                args.flat,
+                args.subsample_fps,
+                args.random,
+                args.indices,
+                args.indices_normalizer,
+                args.rsd_type,
+                args.fps,
+                transform=transform,
+                sample_transform=subsample,
+            )
+            testset = UCFDataset(
+                data_root,
+                args.data_dir,
+                args.test_split,
+                args.bboxes,
+                args.flat,
+                args.subsample_fps,
+                args.random,
+                args.indices,
+                args.indices_normalizer,
+                args.rsd_type,
+                args.fps,
+                transform=transform,
+            )
         else:
             trainset = ImageDataset(
                 data_root,

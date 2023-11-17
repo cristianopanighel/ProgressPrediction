@@ -107,7 +107,7 @@ def visualise(args):
     os.makedirs("./plots/bars/", exist_ok=True)
     # os.makedirs("./plots/ucf24/", exist_ok=True)
     # video_names = [video_names[0], video_names[4], video_names[5], video_names[45]]
-    video_names = [video_names[1]]
+    video_names = [video_names[16]]
 
     frames_per_video = {}
     max_num_frames = 0

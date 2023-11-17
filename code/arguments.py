@@ -75,8 +75,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--roi_size", type=int, default=3)
     parser.add_argument('--finetune', action='store_true')
     # network loading
-    parser.add_argument("--load_experiment", type=str, default=None)
-    parser.add_argument("--load_iteration", type=int, default=None)
+    parser.add_argument("--load_experiment", type=str, default=None)  # pn_bars
+    parser.add_argument("--load_iteration", type=int, default=None)  # 1000
     # optimizer
     parser.add_argument(
         "--optimizer", type=str, default="adam", choices=["adam", "sgd"]
