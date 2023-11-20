@@ -20,11 +20,11 @@
 #SBATCH --begin=now
 
 ### GPU request
-#SBATCH --gres=gpu
+#SBATCH --gres=gpu:1
 #SBATCH --constraint=cudadrv510
 
 #SBATCH --qos=short
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=16
 
 wandb offline
 python3 /home/cpanighe/ProgressPrediction/code/main.py \
@@ -38,8 +38,8 @@ python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --test_split 1.txt \
     --batch_size 1 \
     --network progressnet \
-    --backbone vgg16 \
-    --load_backbone vgg16.pth \
+    --backbone vgg11 \
+    --load_backbone vgg11.pth \
     --num_workers 2 \
     --subsample \
     --max_length 100 \

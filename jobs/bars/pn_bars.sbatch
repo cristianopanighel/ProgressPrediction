@@ -20,11 +20,11 @@
 #SBATCH --begin=now
 
 ### GPU request
-#SBATCH --gres=gpu
+#SBATCH --gres=gpu:1
 #SBATCH --constraint=cudadrv510
 
 #SBATCH --qos=short
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=16
 
 wandb offline
 python3 /home/cpanighe/ProgressPrediction/code/main.py \
@@ -47,5 +47,4 @@ python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --log_every 100 \
     --test_every 1000 \
     --num_workers 2 \
-    --no_resize \
-    --optimizer sgd
+    --no_resize

@@ -7,8 +7,8 @@
 #SBATCH --mail-user=cristiano.panighel@studenti.unipd.it
 
 ### Standard output and error
-#SBATCH --error=pn_ucf.err
-#SBATCH --output=pn_ucf.out
+#SBATCH --error=pn_ucf_1.err
+#SBATCH --output=pn_ucf_1.out
 
 ### Number of tasks
 #SBATCH --ntasks=1
@@ -20,19 +20,19 @@
 #SBATCH --begin=now
 
 ### GPU request
-#SBATCH --gres=gpu
+#SBATCH --gres=gpu:1
 #SBATCH --constraint=cudadrv510
 
 #SBATCH --qos=medium
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=16
 
 wandb offline
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:32
 python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
-    --experiment_name pn_ucf \
-    --wandb_name pn_ucf \
-    --wandb_project pn_ucf \
+    --experiment_name pn_ucf_1 \
+    --wandb_name pn_ucf_1 \
+    --wandb_project pn_ucf_1 \
     --dataset ucf24 \
     --data_dir rgb-images \
     --bboxes \

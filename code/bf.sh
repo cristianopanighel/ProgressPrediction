@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # embed
-python main.py --seed 42 \
+python main.py \
+    --seed 42 \
     --dataset breakfast \
     --data_dir rgb-images \
     --train_split all_scrambledegg.txt \
@@ -17,7 +18,8 @@ python main.py --seed 42 \
     --num_workers 1
 
 # sequence
-python main.py --seed 42 \
+python main.py \
+    --seed 42 \
     --experiment_name progressnet_bf_scrambledegg_1 \
     --wandb_tags fold_s1 scrambledegg \
     --dataset breakfast \
@@ -40,7 +42,8 @@ python main.py --seed 42 \
     --test_every 500
 
 # segment
-python main.py --seed 42 \
+python main.py \
+    --seed 42 \
     --experiment_name progressnet_bf_scrambledegg_segment_1 \
     --wandb_tags fold_s1 scrambledegg \
     --dataset breakfast \
@@ -64,7 +67,8 @@ python main.py --seed 42 \
     --test_every 500
 
 # indices
-python main.py     --seed 42 \
+python main.py \
+    --seed 42 \
     --experiment_name progressnet_bf_scrambledegg_indices_1 \
     --wandb_tags fold_s1 scrambledegg \
     --dataset breakfast \

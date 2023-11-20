@@ -95,7 +95,6 @@ class Experiment:
                     self.network.eval()
                     with torch.no_grad():
                         for batch in self.testloader:
-                            # split option?
                             batch_result = self.train_fn(
                                 self.network, self.criterion, batch, self.max_length, self.device
                             )
