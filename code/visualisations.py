@@ -168,10 +168,9 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
 
     data = [[] for _ in modes]
     networks = [key for key in results[dataset] if key not in BASELINES]
-    xs_indices = np.array([0, 1, 3, 4, 5])
+    # xs_indices = np.array([0, 1, 3, 4, 5])
+    xs_indices = np.array([0])
     for network in networks:
-        if network in BASELINES:
-            continue
         for i, mode in enumerate(modes):
             if mode in results[dataset][network]:
                 data[i].append(results[dataset][network][mode])
@@ -255,8 +254,9 @@ def plot_baselines():
     print('ucf', ucf_index_loss, ucf_static_loss, ucf_random_loss)
 
     # figure, axs = plt.subplots(1, 3, figsize=(19.2, 4.8 * 1.3))
-    figure, axs = plt.subplots(1, 1, figsize=(19.2, 4.8 * 1.3))
+    figure, axs = plt.subplots(1, 2, figsize=(19.2, 4.8 * 1.3))
     axs[0].plot(ucf_predictions, label="average-index")
+    axs[1].plot(ucf_predictions, label="average-index")
     # axs[1].plot(c80_predictions, label="average-index")
     # axs[2].plot(bf_predictions, label="average-index")
 
@@ -272,6 +272,11 @@ def plot_baselines():
         ax.set_ylabel("Progress")
         ax.legend()
     axs[0].set_title(
+        "(a) Average-index baseline on UCF101-24",
+        y=TITLE_Y_OFFSET / 1.2,
+        x=TITLE_X_OFFSET,
+    )
+    axs[1].set_title(
         "(a) Average-index baseline on UCF101-24",
         y=TITLE_Y_OFFSET / 1.2,
         x=TITLE_X_OFFSET,
@@ -329,38 +334,32 @@ def plot_baseline_example():
 
 def make_length_plot(lengths, ax: plt.Axes, title: str, bucket_size: int = 10):
     buckets = {}
-    q1 = np.percentile(lengths, 25)
-    mean = np.percentile(lengths, 50)
-    q3 = np.percentile(lengths, 65)
     for length in lengths:
         length = math.floor(length / bucket_size) * bucket_size
         if length not in buckets:
             buckets[length] = 0
         buckets[length] += 1
     ax.bar(buckets.keys(), buckets.values(), width=bucket_size)
-    # ax.axvline(q1, color='red', linestyle=':')
-    ax.axvline(mean, color='red')
-    # ax.axvline(q3, color='red', linestyle=':')
-    # title = title + f'\nQ1={round(q1)}, mean={round(mean)}, Q3={round(q3)}'
     ax.set_title(title, y=TITLE_Y_OFFSET*1.1, x=TITLE_X_OFFSET)
 
 
 def plot_dataset_lengths():
     # figure, axs = plt.subplots(1, 3, figsize=(6.4 * 2, 4.4))
-    figure, axs = plt.subplots(1, 1, figsize=(6.4 * 2, 4.4))
+    figure, axs = plt.subplots(1, 2, figsize=(6.4 * 2, 4.4))
     make_length_plot(
         ucf101['all'], axs[0], '(a) video length distribution for UCF101-24', bucket_size=10)
     # make_length_plot(
     #     cholec80['all'], axs[1], '(b) video length distribution for Cholec80', bucket_size=100)
     # make_length_plot(
     #     breakfast['all'], axs[2], '(c) video length distribution for breakfast', bucket_size=100)
-    # make_length_plot(bars['all'], axs[3], '(d) video length distribution for synthetic dataset', bucket_size=10)
+    make_length_plot(bars['all'], axs[1], '(d) video length distribution for synthetic dataset', bucket_size=10)
     for ax in axs.flat:
         ax.set_xlabel("Video Length")
         ax.set_ylabel("Number of Videos")
     plt.tight_layout()
     plt.savefig(f'./plots/dataset_lengths.{FILE}')
     plt.clf()
+    plt.close()
 
 
 def plot_synthetic(video_index: int, frame_indices: List[int]):
@@ -379,7 +378,7 @@ def plot_synthetic(video_index: int, frame_indices: List[int]):
         ax.axis('off')
         progress = (frame_index + 1) / num_frames
         ax.set_title(f'({letter}) \nt={frame_index}\np={round(progress * 100, 1)}%',
-                     y=TITLE_Y_OFFSET * 2.2, x=TITLE_X_OFFSET)
+                     y=TITLE_Y_OFFSET * 2.5, x=TITLE_X_OFFSET)
 
     plt.tight_layout()
     plt.savefig(f'./plots/bars.{FILE}')
@@ -419,6 +418,7 @@ def visualise_video(video_dir: str, timestamps: List[int], result_paths: List[st
             axs[-1].plot(data, label=name, linewidth=LINEWIDTH)
 
     axs[-1].plot(ground_truth, label='Ground Truth', linewidth=LINEWIDTH)
+    axs[-1].plot(static, label='Static', linewidth=LINEWIDTH)
     axs[-1].set_xlabel('Frame')
     axs[-1].set_ylabel('Progress')
     axs[-1].tick_params(axis='both', which='major')
@@ -514,18 +514,18 @@ def tube_stats(splitfile: str):
 
 def dataset_statistics():
     stats('ucf24', ['all', 'train', 'test'], length=True)
-    tube_stats('all_tubes.txt')
-    stats('breakfast', ['all'], length=True)
+    tube_stats('all.txt')
+    # stats('breakfast', ['all'], length=True)
 
 
 def dataset_visualisations():
     transform = transforms.Resize((240, 320))
     dataset = UCFDataset(os.path.join(DATA_ROOT, "ucf24"),
                          "rgb-images", f"small.txt", sample_transform=Middle())
-    num_activities = len(dataset) // 10
+    num_activities = len(dataset) // 12
 
     frames = []
-    fig, axs = plt.subplots(num_activities, 10, figsize=(6.4, 4.8*(24/10)))
+    fig, axs = plt.subplots(num_activities, 12, figsize=(24, 4.8*(24/12)))
     unique_names = []
     for name, frame, _ in dataset:
         frames.append(transform(frame[0]))
@@ -564,21 +564,21 @@ def visualise_results():
     #         ('average-index', f'./data/cholec_baseline.txt', '-')],
     #        f'cholec80_video{index}', 200
     #    )
-    for index, timestamp in zip(['00015'], [(10, 55)]):
+    for index, timestamp in zip(['00015'], [(0, 15)]):
         visualise_video(
             os.path.join(DATA_ROOT, f'bars/rgb-images/{index}'), timestamp,
-            [('ProgressNet', f'./data/bars/pn_bars/{index}.txt', '-.')],
+            [('ProgressNet', f'../jobs/bars/data/pn_bars/{index}.txt', '-.')],
             f'bars_video{index}', 1
         )
     # # 0, 122, 0, 0, 0
-    # for index, timestamp, offset in zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [80, 45, 60, 125, 45, 125], [0, 0, 0, 0, 0, 0]):
-    #     visualise_video(
-    #         os.path.join(DATA_ROOT, f'ucf24/rgb-images/{index}'), timestamp,
-    #         [('ProgressNet (full-video)', f'./data/ucf/pn_ucf/{index.replace("/", "_")}_0.txt', '-.'),
-    #          ('ProgressNet (full-video)', f'./data/ucf/pn_ucf_segments/{index.replace("/", "_")}_0.txt', '-.'),
-    #          ('average-index', f'./data/ucf_baseline.txt', '-')],
-    #          f'ucf_video_{index.replace("/", "_")}', 1, offset=offset
-    #     )
+    for index, timestamp in zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,125), (0,45), (0,125)]):
+        visualise_video(
+            os.path.join(DATA_ROOT, f'ucf24/rgb-images/{index}'), timestamp,
+            [('ProgressNet (full-video)', f'../jobs/ucf/data/pn_ucf/{index.replace("/", "_")}_0.txt', '-.'),
+             ('ProgressNet (full-video segments)', f'../jobs/ucf/data/pn_ucf_segments/{index.replace("/", "_")}_0.txt', '-.'),
+             ('average-index', f'./data/ucf_baseline.txt', '-')],
+             f'ucf_video_{index.replace("/", "_")}', 1
+        )
     # for index, timestamp in zip(['pancake/P12/cam01', 'sandwich/P07/webcam01'], [150, 65]):
     #     visualise_video(
     #         os.path.join(DATA_ROOT, f'breakfast/rgb-images/{index}'), timestamp,
@@ -605,30 +605,25 @@ def main():
     except:
         pass
     # set_font_sizes(16, 18, 20)
-    # plot_baseline_example()
-    # return
+    plot_baselines()
+    plot_baseline_example()
     dataset_visualisations()
-    set_font_sizes(16, 18, 20)
-    visualise_results()
     set_font_sizes()
     # result plots
     results = load_results('./results.json')
-    # for dataset in ["UCF101-24", "breakfast"]:
-    #     plot_result_bar(results, dataset, [
-    #                     "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
-    #     plot_result_bar(results, dataset, [
-    #                     "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
+    for dataset in ["UCF101-24"]:# , "breakfast"]:
+        plot_result_bar(results, dataset, [
+                        "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
+        plot_result_bar(results, dataset, [
+                        "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
     plot_result_bar(results, "Bars", [
                     "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
     # average index baseline
-    set_font_sizes(16, 18, 20)
-    # plot_baselines()
-    # plot_baseline_example()
     set_font_sizes()
     # dataset statistics
     plot_dataset_lengths()
     # syntethic dataset example
-    plot_synthetic(4, [0, 15, 35, 58, 71])
+    plot_synthetic(4, [0, 3, 7, 11, 15])
     # example progress predictions
     set_font_sizes(16, 18, 20)
     visualise_results()
