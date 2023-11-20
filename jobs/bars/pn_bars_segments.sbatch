@@ -1,14 +1,14 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=pn_bars_segment
+#SBATCH --job-name=pn_bars_segments
 
 ###
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=cristiano.panighel@studenti.unipd.it
 
 ### Standard output and error
-#SBATCH --error=pn_bars_segment.err
-#SBATCH --output=pn_bars_segment.out
+#SBATCH --error=pn_bars_segments.err
+#SBATCH --output=pn_bars_segments.out
 
 ### Number of tasks
 #SBATCH --ntasks=1
@@ -20,18 +20,18 @@
 #SBATCH --begin=now
 
 ### GPU request
-#SBATCH --gres=gpu
+#SBATCH --gres=gpu:1
 #SBATCH --constraint=cudadrv510
 
 #SBATCH --qos=short
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=16
 
 wandb offline
 python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
-    --experiment_name pn_bars_segment \
-    --wandb_name pn_bars_segment \
-    --wandb_project pn_bars_segment \
+    --experiment_name pn_bars_segments \
+    --wandb_name pn_bars_segments \
+    --wandb_project pn_bars_segments \
     --dataset bars \
     --data_dir rgb-images \
     --train_split train.txt \

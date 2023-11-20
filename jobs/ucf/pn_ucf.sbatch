@@ -20,11 +20,11 @@
 #SBATCH --begin=now
 
 ### GPU request
-#SBATCH --gres=gpu
+#SBATCH --gres=gpu:1
 #SBATCH --constraint=cudadrv510
 
 #SBATCH --qos=medium
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=16
 
 wandb offline
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:32

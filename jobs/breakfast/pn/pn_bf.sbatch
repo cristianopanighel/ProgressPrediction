@@ -1,32 +1,47 @@
 #!/bin/sh
+### job name
+#SBATCH --job-name=pn_bf
 
-#SBATCH --partition=general
-#SBATCH --qos=medium
-#SBATCH --time=36:00:00
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=16G
+###
 #SBATCH --mail-type=ALL
-#SBATCH --gres=gpu:a40
+#SBATCH --mail-user=cristiano.panighel@studenti.unipd.it
+
+### Standard output and error
+#SBATCH --error=pn_bf.err
+#SBATCH --output=pn_bf.out
+
+### Number of tasks
+#SBATCH --ntasks=1
+
+### RAM requirement
+#SBATCH --mem=16G
+
+### Time limit for the job
+#SBATCH --begin=now
+
+### GPU request
+#SBATCH --gres=gpu
+#SBATCH --constraint=cudadrv510
+
+#SBATCH --qos=medium
+#SBATCH --cpus-per-task=2
 #SBATCH --array=1,2,3,4
 
-module use /opt/insy/modulefiles
-module load cuda/10.0 cudnn/10.0-7.4.2.24
-
-srun python /home/nfs/fransdeboer/mscfransdeboer/code/main.py \
+wandb offline
+python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
     --experiment_name pn_bf_${SLURM_ARRAY_TASK_ID} \
-    --wandb_group normal \
-    --wandb_tags fold_${SLURM_ARRAY_TASK_ID} \
+    --wandb_name pn_bf_${SLURM_ARRAY_TASK_ID} \
+    --wandb_project pn_bf_${SLURM_ARRAY_TASK_ID} \
     --dataset breakfast \
-    --data_dir rgb-images \
+    --data_dir features \
     --train_split train_s${SLURM_ARRAY_TASK_ID}.txt \
     --test_split test_s${SLURM_ARRAY_TASK_ID}.txt \
     --batch_size 1 \
     --iterations 50000 \
     --network progressnet \
-    --backbone vgg16 \
-    --load_backbone vgg16.pth \
+    --backbone vgg11 \
+    --load_backbone vgg11.pth \
     --dropout_chance 0.5 \
     --lr_decay 1.0 \
     --lr_decay_every 1000000 \
