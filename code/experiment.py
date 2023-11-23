@@ -1,14 +1,12 @@
+import os
+import statistics
 import torch
+import wandb
+
 from torch import nn, optim
 from torch.utils.data import DataLoader
-import random
-import numpy as np
-from typing import Dict
-import os
-import wandb
-import statistics
 from tqdm import tqdm
-
+from typing import Dict
 
 def get_device() -> torch.device:
     # if torch.backends.mps.is_available():
@@ -17,8 +15,6 @@ def get_device() -> torch.device:
         device = "cuda"
     else:
         device = "cpu"
-    #torch.backends.cudnn.enabled = False
-    # print("CUDA? " + str(torch.cuda.is_available()))
     return torch.device(device)
 
 

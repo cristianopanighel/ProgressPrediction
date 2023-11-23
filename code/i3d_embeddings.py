@@ -1,20 +1,19 @@
+import argparse
+import numpy as np
+import os
+import pickle
 import torch
+
+from datasets import ChunkDataset, load_splitfile
+from dotenv import load_dotenv
+from experiment import get_device
+from main import set_seeds
+from networks import InceptionI3d
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-import argparse
-import os
-import pickle
-import numpy as np
-
-from networks import InceptionI3d
-from datasets import ChunkDataset, load_splitfile
-from experiment import get_device
-from main import set_seeds
-from dotenv import load_dotenv
 
 load_dotenv()
-
 
 def load_npy(path: str):
     with open(path, 'rb') as f:

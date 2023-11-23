@@ -1,12 +1,8 @@
-import os
 import random
-import math
 import torch
 import torch.nn as nn
+
 from torchvision import models
-from typing import List, Tuple
-from copy import copy
-import statistics
 
 def create_networks():
     resnet = models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1)
@@ -26,9 +22,7 @@ def create_networks():
 
 def main() -> None:
     random.seed(42)
-    # print(torch.cuda.get_arch_list())
     create_networks()
-    # print(torch.cuda.is_available())
 
 
 if __name__ == "__main__":

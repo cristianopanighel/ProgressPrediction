@@ -1,14 +1,13 @@
 import os
 import torch
 import torch.nn as nn
-from torchvision import transforms
+
+from datasets import ImageDataset, UCFDataset
 from dotenv import load_dotenv
 
-from datasets import FeatureDataset, ImageDataset, UCFDataset
-
 load_dotenv()
-DATA_ROOT = os.environ.get('MAIN')
 
+DATA_ROOT = os.environ.get('MAIN')
 
 def calc_baseline(train_lengths, test_lengths):
 
@@ -106,30 +105,6 @@ def bf_baseline():
             1,
             False
         )
-        # trainset = FeatureDataset(
-        #    os.path.join(DATA_ROOT, "breakfast"),
-        #    "features",
-        #    f"train_s{i}.txt",
-        #    False,
-        #    1,
-        #    False,
-        #    False,
-        #    1,
-        #    "none",
-        #    1,
-        # )
-        # testset = FeatureDataset(
-        #    os.path.join(DATA_ROOT, "breakfast"),
-        #    "features",
-        #    f"train_s{i}.txt",
-        #    False,
-        #    1,
-        #    False,
-        #    False,
-        #    1,
-        #    "none",
-        #    1,
-        # )
     for i, loss in enumerate(calc_baseline(trainset.lengths, testset.lengths)):
         losses[i] += float(loss.split()[1]) / 4
     print(f"--- bf all ---")
@@ -162,30 +137,6 @@ def bf_baseline():
             1,
             False
         )
-    # trainset = FeatureDataset(
-    #    os.path.join(DATA_ROOT, "breakfast"),
-    #    "features",
-    #    f"train_s{i}.txt",
-    #    False,
-    #    15,
-    #    False,
-    #    False,
-    #    1,
-    #    "none",
-    #    1,
-    # )
-    # testset = FeatureDataset(
-    #    os.path.join(DATA_ROOT, "breakfast"),
-    #    "features",
-    #    f"train_s{i}.txt",
-    #    False,
-    #    15,
-    #    False,
-    #    False,
-    #    1,
-    #    "none",
-    #    1,
-    # )
     for i, loss in enumerate(calc_baseline(trainset.lengths, testset.lengths)):
         losses[i] += float(loss.split()[1]) / 4
     print(f"--- bf all (sampled) ---")

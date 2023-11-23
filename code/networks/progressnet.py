@@ -26,8 +26,7 @@ class ProgressNet(nn.Module):
             self.device = "cuda"
         else:
             self.device = "cpu"
-        #torch.backends.cudnn.enabled = False
-        # print("CUDA? " + str(torch.cuda.is_available()))
+
         if backbone == "vgg16":
             self.backbone = models.vgg16().features
         elif backbone == "vgg11":
@@ -145,21 +144,3 @@ class ProgressNet(nn.Module):
 
     def reset(self):
         self.hidden1, self.hidden2 = None, None
-
-# class ProgressNet(nn.Module):
-#     def __init__(self, feature_dim: int, dropout_chance: float) -> None:
-#         super().__init__()
-
-#         self.fc7 = nn.Linear(feature_dim, 64)
-#         self.fc7_dropout = nn.Dropout(p=dropout_chance)
-#         self.lstm1 = nn.LSTM(64, 32, batch_first=True)
-#         self.lstm2 = nn.LSTM(32, 32, batch_first=True)
-#         self.fc8 = nn.Linear(32, 1)
-
-#     def forward(self, data: torch.FloatTensor):
-#         B, S, F = data.shape
-#         data = torch.relu(self.fc7_dropout(self.fc7(data)))
-#         data, _ = self.lstm1(data)
-#         data, _ = self.lstm2(data)
-#         data = torch.sigmoid(self.fc8(data))
-#         return data.reshape(B, S)

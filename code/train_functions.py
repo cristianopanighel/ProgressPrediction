@@ -1,5 +1,5 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
 
 def train_flat_features(network, criterion, batch, max_length, device, optimizer=None, return_results=False):
     l2_loss = nn.MSELoss(reduction="sum")

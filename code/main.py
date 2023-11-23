@@ -1,23 +1,21 @@
-from torch import nn, optim
-from torch.utils.data import DataLoader
-from torchvision import transforms
-import torch
-from tqdm import tqdm
+import numpy as np
 import os
 import random
-import numpy as np
+import torch
 import wandb
 
 from arguments import parse_args, wandb_init
-from networks import ProgressNet
-from datasets import FeatureDataset, ImageDataset, UCFDataset
-from datasets import Subsample, Subsection, Truncate
-from experiment import Experiment
-from train_functions import train_flat_features, train_flat_frames, train_progress, train_rsd, embed_frames
+from datasets import ImageDataset, UCFDataset, Subsample, Subsection, Truncate
 from dotenv import load_dotenv
+from experiment import Experiment
+from networks import ProgressNet
+from torch import nn, optim
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from tqdm import tqdm
+from train_functions import train_flat_features, train_flat_frames, train_progress, train_rsd, embed_frames
 
 load_dotenv()
-
 
 def set_seeds(seed: int) -> None:
     torch.random.manual_seed(seed)
@@ -119,32 +117,6 @@ def main():
                 args.shuffle,
                 transform=transform,
             )
-    # else:
-    #    trainset = FeatureDataset(
-    #        data_root,
-    #        args.data_dir,
-    #        args.train_split,
-    #        args.flat,
-    #        args.subsample_fps,
-    #        args.random,
-    #        args.indices,
-    #        args.indices_normalizer,
-    #        args.rsd_type,
-    #        args.fps,
-    #        sample_transform=subsample,
-    #    )
-    #    testset = FeatureDataset(
-    #        data_root,
-    #        args.data_dir,
-    #        args.test_split,
-    #        args.flat,
-    #        args.subsample_fps,
-    #        args.random,
-    #        args.indices,
-    #        args.indices_normalizer,
-    #        args.rsd_type,
-    #        args.fps,
-    #    )
 
     trainloader = DataLoader(
         trainset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True

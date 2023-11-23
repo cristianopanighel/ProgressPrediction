@@ -1,14 +1,14 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=pn_bars_1
+#SBATCH --job-name=pn_bf_1
 
 ###
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=cristiano.panighel@studenti.unipd.it
 
 ### Standard output and error
-#SBATCH --error=pn_bars_1.err
-#SBATCH --output=pn_bars_1.out
+#SBATCH --error=pn_bf_1.err
+#SBATCH --output=pn_bf_1.out
 
 ### Number of tasks
 #SBATCH --ntasks=1
@@ -29,21 +29,18 @@
 wandb offline
 python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
-    --experiment_name pn_bars_1 \
-    --wandb_name pn_bars_1 \
-    --wandb_project pn_bars_1 \
-    --dataset bars \
+    --dataset breakfast \
     --data_dir rgb-images \
-    --train_split 1.txt \
-    --test_split 1.txt \
+    --train_split train_s1.txt \
+    --test_split test_small.txt \
     --batch_size 1 \
     --network progressnet \
     --backbone vgg11 \
     --load_backbone vgg11.pth \
     --num_workers 2 \
-    --subsample \
-    --max_length 100 \
-    --load_experiment pn_bars_segments \
-    --load_iteration 40000 \
-    --save_dir pn_bars \
-    --no_resize
+    --max_length 550 \
+    --load_experiment pn_bf_random \
+    --load_iteration 50000 \
+    --subsample_fps 15 \
+    --random \
+    --save_dir pn_bf_random

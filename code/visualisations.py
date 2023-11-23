@@ -1,28 +1,29 @@
+import argparse
 import json
-from typing import Dict, List
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import torch.nn as nn
-import torch
-import statistics
-from PIL import Image
-import string
-import pandas as pd
-import os
-import argparse
-import math
-import torchvision.transforms as transforms
 import random
+import string
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
 
-from datasets import FeatureDataset, ImageDataset, UCFDataset
-from datasets import Middle
+from datasets import ImageDataset, UCFDataset, Middle
 from dotenv import load_dotenv
+from PIL import Image
+from typing import Dict, List
 
 load_dotenv()
 
 # Constants
 DATA_ROOT = os.environ.get("MAIN")
+BARS_IMAGES = os.environ.get("BARS_IMAGES")
+BARS = os.environ.get("BARS")
+UCF_IMAGES = os.environ.get("UCF_IMAGES")
+UCF = os.environ.get("UCF")
+UCF_SEGMENTS = os.environ.get("UCF_SEGMENTS")
 BAR_WIDTH = 0.5
 SPACING = 1.5
 MODE_COLOURS = {
@@ -61,24 +62,18 @@ def set_spines(enable: bool):
 # Datasets
 if not os.path.isfile('./data/lengths.json'):
     os.makedirs('./data/', exist_ok=True)
-    # print('loading ucf101')
-    # ucf101 = {
-    #     'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
-    #     'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
-    #     'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
-    # }
-    # print('loading cholec80')
-    # cholec80 = {
-    #    'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"all_0.txt").lengths),
-    #    'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"t12_{i}.txt").lengths) for i in range(4)],
-    #    'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "cholec80"), "rgb-images", f"e_{i}.txt").lengths) for i in range(4)],
-    # }
-    # print('loading breakfast')
-    # breakfast = {
-    #    'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
-    #    'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
-    #    'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
-    # }
+    print('loading ucf101')
+    ucf101 = {
+        'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
+        'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
+        'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
+    }
+    print('loading breakfast')
+    breakfast = {
+       'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
+       'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
+       'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
+    }
     print('loading bars')
     bars = {
         'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"all.txt").lengths),
@@ -87,17 +82,15 @@ if not os.path.isfile('./data/lengths.json'):
     }
     with open('./data/lengths.json', 'w+') as f:
         json.dump({
-            # 'ucf101': ucf101,
-            # 'cholec80': cholec80,
-            # 'breakfast': breakfast,
+            'ucf101': ucf101,
+            'breakfast': breakfast,
             'bars': bars
         }, f)
 else:
     with open('./data/lengths.json') as f:
         data = json.load(f)
     ucf101 = data['ucf101']
-    # cholec80 = data['cholec80']
-    # breakfast = data['breakfast']
+    breakfast = data['breakfast']
     bars = data['bars']
 
 # Helper functions
@@ -208,28 +201,9 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
             color=(0.5058823529411764, 0.4470588235294118, 0.7019607843137254),
             linewidth=LINEWIDTH,
         )
-        plt.text(
-            3,
-            results[dataset]["average-index"]["'full-video' inputs"] - 0.5,
-            str(results[dataset]["average-index"]
-                ["'full-video' inputs"]) + '%',
-        ).set_bbox({"facecolor": "white", "edgecolor": "white"})
-        plt.text(
-            3,
-            results[dataset]["static-0.5"]["'full-video' inputs"] - 0.5,
-            str(results[dataset]["static-0.5"]["'full-video' inputs"]) + '%',
-        ).set_bbox({"facecolor": "white", "edgecolor": "white"})
-        plt.text(
-            3,
-            results[dataset]["random"]["'full-video' inputs"] - 0.5,
-            str(results[dataset]["random"]["'full-video' inputs"]) + '%',
-        ).set_bbox({"facecolor": "white", "edgecolor": "white"})
 
     plt.grid(axis='y')
     plt.axhline(y=0, linestyle='-', color='grey', zorder=-1)
-    print("xticks " + str(xticks))
-    for el in networks:
-        print("network " + el)
     plt.xticks(xticks, networks)
     if dataset == 'Bars':
         yticks = [0, 1, 2, 3, 4]
@@ -239,7 +213,7 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
     plt.yticks(yticks, [f'{tick}%' for tick in yticks])
     plt.ylabel("MAE")
     plt.legend(loc='upper center', bbox_to_anchor=(
-        0.5, -0.15), fancybox=False, shadow=False, ncol=3)
+        0.5, -0.15), fancybox=False, shadow=False, ncol=3, fontsize = 'x-small')
     plt.tight_layout()
     filename = f"./plots/results/{dataset}_{'_'.join(names).replace(' ', '_')}"
     plt.savefig(f"{filename}.{FILE}")
@@ -248,48 +222,47 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
 
 
 def plot_baselines():
-    # c80_predictions, c80_index_loss, c80_static_loss, c80_random_loss = calculate_average_baseline(
-    #     cholec80['train'], cholec80['test'])
-    # bf_predictions, bf_index_loss, bf_static_loss, bf_random_loss = calculate_average_baseline(
-    #     breakfast['train'], breakfast['test'])
+    bf_predictions, bf_index_loss, bf_static_loss, bf_random_loss = calculate_average_baseline(
+        breakfast['train'], breakfast['test'])
     ucf_predictions, ucf_index_loss, ucf_static_loss, ucf_random_loss = calculate_average_baseline(
         ucf101['train'], ucf101['test'])
-    # print('c80', c80_index_loss, c80_static_loss, c80_random_loss)
-    # print('bf', bf_index_loss, bf_static_loss, bf_random_loss)
+    bars_predictions, bars_index_loss, bars_static_loss, bars_random_loss = calculate_average_baseline(
+        bars['train'], bars['test'])
+    print('bf', bf_index_loss, bf_static_loss, bf_random_loss)
     print('ucf', ucf_index_loss, ucf_static_loss, ucf_random_loss)
+    print('bars', bars_index_loss, bars_static_loss, bars_random_loss)
 
-    # figure, axs = plt.subplots(1, 3, figsize=(19.2, 4.8 * 1.3))
-    figure, axs = plt.subplots(1, 1, figsize=(19.2, 4.8 * 1.3))
-    axs[0].plot(ucf_predictions, label="average-index")
-    # axs[1].plot(c80_predictions, label="average-index")
-    # axs[2].plot(bf_predictions, label="average-index")
+    figure, axs = plt.subplots(1, 3, figsize=(19.2, 4.8 * 1.3))
+    axs[0].plot(bf_predictions, label="average-index")
+    axs[1].plot(ucf_predictions, label="average-index")
+    axs[2].plot(bars_predictions, label="average-index")
 
+    with open('./data/bf_baseline.txt', 'w+') as f:
+        f.write('\n'.join([str(val) for val in bf_predictions.tolist()]))
     with open('./data/ucf_baseline.txt', 'w+') as f:
         f.write('\n'.join([str(val) for val in ucf_predictions.tolist()]))
-    # with open('./data/cholec_baseline.txt', 'w+') as f:
-    #    f.write('\n'.join([str(val) for val in c80_predictions.tolist()]))
-    # with open('./data/bf_baseline.txt', 'w+') as f:
-    #    f.write('\n'.join([str(val) for val in bf_predictions.tolist()]))
+    with open('./data/bars_baseline.txt', 'w+') as f:
+        f.write('\n'.join([str(val) for val in bars_predictions.tolist()]))
 
     for ax in axs.flat:
         ax.set_xlabel("Frame")
         ax.set_ylabel("Progress")
         ax.legend()
     axs[0].set_title(
-        "(a) Average-index baseline on UCF101-24",
+       "(a) Average-index baseline on breakfast",
+       y=TITLE_Y_OFFSET / 1.2,
+       x=TITLE_X_OFFSET,
+    )
+    axs[1].set_title(
+        "(b) Average-index baseline on UCF101-24",
         y=TITLE_Y_OFFSET / 1.2,
         x=TITLE_X_OFFSET,
     )
-    # axs[1].set_title(
-    #    "(b) Average-index baseline on Cholec80",
-    #    y=TITLE_Y_OFFSET / 1.2,
-    #    x=TITLE_X_OFFSET,
-    # )
-    # axs[2].set_title(
-    #    "(c) Average-index baseline on breakfast",
-    #    y=TITLE_Y_OFFSET / 1.2,
-    #    x=TITLE_X_OFFSET,
-    # )
+    axs[2].set_title(
+        "(c) Average-index baseline on bars",
+       y=TITLE_Y_OFFSET / 1.2,
+       x=TITLE_X_OFFSET,
+    )
 
     plt.tight_layout()
     plt.savefig(f"./plots/avg_index_baseline.{FILE}")
@@ -300,14 +273,6 @@ def plot_baseline_example():
     predictions, _, _, _ = calc_baselines([10, 20, 30], [50])
 
     plt.figure(figsize=(6.4*1.5, 4.8*1.5))
-    # figure, axs = plt.subplots(1, 1, figsize=(12.8, 4.8))
-    # axs[0].plot([(i + 1) / 10 for i in range(10)], label="Video 1")
-    # axs[0].plot([(i + 1) / 20 for i in range(20)], label="Video 2")
-    # axs[0].plot([(i + 1) / 30 for i in range(30)], label="Video 3")
-    # axs[0].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0], ['0%', '20%', '40%', '60%', '80%', '100%'])
-    # axs[1].plot([(i + 1) / 10 for i in range(10)], label="Video 1", linestyle=':')
-    # axs[1].plot([(i + 1) / 20 for i in range(20)], label="Video 2", linestyle=':')
-    # axs[1].plot([(i + 1) / 30 for i in range(30)], label="Video 3", linestyle=':')
     plt.plot([random.random() for _ in predictions],
              label='random', linestyle=':', linewidth=3)
     plt.plot([0.5 for _ in predictions], label='static-0.5', linewidth=3)
@@ -318,14 +283,6 @@ def plot_baseline_example():
     plt.ylabel('Progress')
     plt.xlim(0, 50)
     plt.legend()
-    # for ax in axs.flat:
-    #     ax.set_xlabel("Frame")
-    #     ax.set_ylabel("Progress")
-    #     ax.set_xlim(0, 50)
-    #     # ax.set(xlabel='Frame', ylabel='Progress')
-    #     ax.legend()
-    # axs[0].set_title("(a) 3 Videos of length 10, 20, and 30", y=TITLE_Y_OFFSET, x=TITLE_X_OFFSET)
-    # axs[1].set_title("(b) Average-index baseline", y=TITLE_Y_OFFSET, x=TITLE_X_OFFSET)
     plt.tight_layout()
     plt.savefig(f"./plots/avg_index_example.{FILE}")
     plt.clf()
@@ -333,35 +290,23 @@ def plot_baseline_example():
 
 def make_length_plot(lengths, ax: plt.Axes, title: str, bucket_size: int = 10):
     buckets = {}
-    # q1 = np.percentile(lengths, 25)
-    # mean = np.percentile(lengths, 50)
-    # q3 = np.percentile(lengths, 75)
     for length in lengths:
         length = math.floor(length / bucket_size) * bucket_size
         if length not in buckets:
             buckets[length] = 0
         buckets[length] += 1
     ax.bar(buckets.keys(), buckets.values(), width=bucket_size)
-    # ax.axvline(q1, color='red', linestyle=':')
-    # ax.axvline(mean, color='red')
-    # ax.axvline(q3, color='red', linestyle=':')
-    # title = title + f'\nQ1={round(q1)}, mean={round(mean)}, Q3={round(q3)}'
     ax.set_title(title, y=TITLE_Y_OFFSET*1.1, x=TITLE_X_OFFSET)
 
 
 def plot_dataset_lengths():
-    # figure, axs = plt.subplots(1, 3, figsize=(6.4 * 2, 4.4))
-    figure, axs = plt.subplots(1, 2, figsize=(6.4 * 2, 4.4))
-    # make_length_plot(
-    # ucf101['all'], axs[0], '(a) video length distribution for UCF101-24', bucket_size=10)
-    # make_length_plot(
-    #     cholec80['all'], axs[1], '(b) video length distribution for Cholec80', bucket_size=100)
-    # make_length_plot(
-    #     breakfast['all'], axs[2], '(c) video length distribution for breakfast', bucket_size=100)
+    figure, axs = plt.subplots(1, 3, figsize=(6.4 * 2, 4.4))
     make_length_plot(
-        bars['all'], axs[0], '(d) video length distribution for synthetic dataset', bucket_size=10)
+        breakfast['all'], axs[0], '(a) video length distribution for breakfast', bucket_size=100)
     make_length_plot(
-        bars['all'], axs[1], '(d) video length distribution for synthetic dataset', bucket_size=10)
+        ucf101['all'], axs[1], '(b) video length distribution for UCF101-24', bucket_size=10)
+    make_length_plot(
+        bars['all'], axs[2], '(c) video length distribution for synthetic dataset', bucket_size=10)
     for ax in axs.flat:
         ax.set_xlabel("Video Length")
         ax.set_ylabel("Number of Videos")
@@ -371,7 +316,7 @@ def plot_dataset_lengths():
 
 
 def plot_synthetic(video_index: int, frame_indices: List[int]):
-    data_dir = os.path.join(DATA_ROOT, 'bars/rgb-images')
+    data_dir = os.environ.get("BARS_IMAGES")
     video_name = sorted(os.listdir(data_dir))[video_index]
     video_path = os.path.join(data_dir, video_name)
     frame_names = sorted(os.listdir(video_path))
@@ -401,7 +346,6 @@ def visualise_video(video_dir: str, timestamps: List[int], result_paths: List[st
     ax3 = plt.subplot(gs[:, 1:])
     axs = [ax1, ax2, ax3]
 
-    # fig, axs = plt.subplots(1, 2, figsize=(6.4*2, 4.8*1.5), gridspec_kw={'width_ratios': [1, 3]})
     frames = sorted(os.listdir(video_dir))[::subsample]
     num_frames = len(frames)
     index = timestamps[0]
@@ -413,13 +357,10 @@ def visualise_video(video_dir: str, timestamps: List[int], result_paths: List[st
         axs[i].set_title(f't={index}', fontsize=20)
 
     ground_truth = [(i+1) / num_frames for i in range(num_frames)]
-    print(ground_truth)
     static = [0.5 for _ in range(num_frames)]
     for index in timestamps:
         axs[-1].axvline(index, color='red', linestyle=':')
     for name, path, linestyle in result_paths:
-        print("path " + path)
-        print("name " + name)
         with open(path) as f:
             data = [float(row.strip()) for row in f.readlines()][:num_frames]
         if name != 'average-index':
@@ -461,7 +402,10 @@ def stats(dataset: str, splitfiles: List[str], length=False):
             if length:
                 frames_path = os.path.join(root, 'rgb-images', line)
                 num_frames = len(os.listdir(frames_path))
-            activity_class = line.split('/')[0]
+            if "breakfast" in dataset:
+                activity_class = line.split('_')[-1]
+            else:
+                activity_class = line.split('/')[0]
             if activity_class not in counts_per_class:
                 counts_per_class[activity_class] = 0
             if activity_class not in num_frames_per_class:
@@ -480,6 +424,7 @@ def stats(dataset: str, splitfiles: List[str], length=False):
         print(
             f'--- {total} videos in {dataset}/{splitfile} ({len(counts_per_class)} classes) ---')
         for activity_class in counts_per_class:
+            # class: number of examples per class (average number of frames per class)
             print(
                 f'{activity_class}: {counts_per_class[activity_class]} ({num_frames_per_class[activity_class] / counts_per_class[activity_class]})')
 
@@ -525,7 +470,7 @@ def tube_stats(splitfile: str):
 
 def dataset_statistics():
     stats('ucf24', ['all', 'train', 'test'], length=True)
-    tube_stats('all_tubes.txt')
+    #tube_stats('all.txt')
     stats('breakfast', ['all'], length=True)
 
 
@@ -533,10 +478,10 @@ def dataset_visualisations():
     transform = transforms.Resize((240, 320))
     dataset = UCFDataset(os.path.join(DATA_ROOT, "ucf24"),
                          "rgb-images", f"small.txt", sample_transform=Middle())
-    num_activities = len(dataset) // 10
+    num_activities = len(dataset) // 12
 
     frames = []
-    fig, axs = plt.subplots(num_activities, 10, figsize=(6.4, 4.8*(24/10)))
+    fig, axs = plt.subplots(num_activities, 12, figsize=(24, 4.8*(24/12)))
     unique_names = []
     for name, frame, _ in dataset:
         frames.append(transform(frame[0]))
@@ -545,54 +490,33 @@ def dataset_visualisations():
             unique_names.append(activity_name)
     for (frame, ax) in zip(frames, axs.flat):
         ax.imshow(frame)
-        # ax.axis('off')
         ax.set_xticks([])
         ax.set_xticks([], minor=True)
         ax.set_yticks([])
         ax.set_yticks([], minor=True)
-    # for (unique_name, ax) in zip(unique_names, axs[:, 0]):
-    #     ax.axis('off')
-    #     ax.text(0, 0, unique_name)
-        # ax.set_aspect('equal')
     plt.tight_layout()
     plt.subplots_adjust(wspace=0.1, hspace=0.1)
     plt.savefig('./plots/ucf_visualisations.png')
-    # ucf101_small = UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"small.txt")
+    plt.clf()
+    plt.close()
 
 
 def visualise_results():
-    # for index, timestamps in zip(['04', '05'], [(210, 1250), (200, 1650)]):
-    #    visualise_video(
-    #        os.path.join(
-    #            DATA_ROOT, f'cholec80/rgb-images/video{index}'), timestamps,
-    #        [('ResNet-2D', f'./data/cholec/resnet_cholec/video{index}.txt', ':'),
-    #         ('ResNet-LSTM',
-    #          f'./data/cholec/lstm_cholec/video{index}.txt', ':'),
-    #         ('UTE', f'./data/cholec/ute_cholec/video{index}.txt', '-.'),
-    #         ('RSDNet', f'./data/cholec/rsd_cholec/video{index}.txt', '-.'),
-    #         ('ProgressNet',
-    #          f'./data/cholec/pn_cholec/video{index}.txt', '-.'),
-    #         ('average-index', f'./data/cholec_baseline.txt', '-')],
-    #        f'cholec80_video{index}', 200
-    #    )
-    os.makedirs(".data/bars/", exist_ok=True)
-    os.makedirs("./data/bars/pn_bars/", exist_ok=True)
     for index, timestamp in zip(['00015'], [(0, 15)]):
         visualise_video(
-            os.path.join(DATA_ROOT, f'bars/rgb-images/{index}'), timestamp,
-            [('ProgressNet', f'./data/bars/pn_bars/{index}.txt', '-.')],
+            os.path.join(BARS_IMAGES,index), timestamp,
+            [('ProgressNet', os.path.join(BARS,f'{index}.txt'), '-.')],
             f'bars_video{index}', 1
         )
-    # # 0, 122, 0, 0, 0
-    # for index, timestamp, offset in zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [80, 45, 60, 125, 45, 125], [0, 0, 0, 0, 0, 0]):
-    #    visualise_video(
-    #        os.path.join(DATA_ROOT, f'ucf24/rgb-images/{index}'), timestamp,
-    #        [('ProgressNet (full-video)', f'./data/ucf/pn_ucf/{index.replace("/", "_")}_0.txt', '-.'),
-    #         ('ProgressNet (full-video)',
-    #          f'./data/ucf/pn_ucf_segments/{index.replace("/", "_")}_0.txt', '-.'),
-    #         ('average-index', f'./data/ucf_baseline.txt', '-')],
-    #        f'ucf_video_{index.replace("/", "_")}', 1, offset=offset
-    #    )
+    for index, timestamp in zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
+       visualise_video(
+           os.path.join(UCF_IMAGES,f'{index}'), timestamp,
+           [('ProgressNet (full-video)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            ('ProgressNet (full-video)',
+             os.path.join(UCF_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            ('average-index', f'./data/ucf_baseline.txt', '-')],
+           f'ucf_video_{index.replace("/", "_")}', 1
+       )
     # for index, timestamp in zip(['P12_cam01_P12_pancake', 'P07_webcam01_P07_sandwich'], [150, 65]):
     #     visualise_video(
     #         os.path.join(DATA_ROOT, f'breakfast/rgb-images/{index}'), timestamp,
@@ -618,26 +542,23 @@ def main():
         os.makedirs('./plots/examples/', exist_ok=True)
     except:
         pass
-    # set_font_sizes(16, 18, 20)
-    # plot_baseline_example()
-    # return
-    dataset_visualisations()
     set_font_sizes(16, 18, 20)
-    visualise_results()
-    set_font_sizes()
+    plot_baselines()
+    plot_baseline_example()
+
+    dataset_visualisations()
+    dataset_statistics()
+
     # result plots
-    results = load_results('code/results.json')
-    # for dataset in ["UCF101-24", "breakfast"]:
-    #     plot_result_bar(results, dataset, [
-    #                     "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
-    #     plot_result_bar(results, dataset, [
-    #                     "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
+    results = load_results(os.environ.get("RESULTS"))
+    for dataset in ["UCF101-24"]:#, "breakfast"]:
+        plot_result_bar(results, dataset, [
+                        "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
+        plot_result_bar(results, dataset, [
+                        "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
     plot_result_bar(results, "Bars", [
                     "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
     # average index baseline
-    set_font_sizes(16, 18, 20)
-    # plot_baselines()
-    # plot_baseline_example()
     set_font_sizes()
     # dataset statistics
     plot_dataset_lengths()

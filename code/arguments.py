@@ -1,10 +1,10 @@
 import argparse
 import os
-from dotenv import load_dotenv
 import wandb
 
-load_dotenv()
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
