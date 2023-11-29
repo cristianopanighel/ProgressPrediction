@@ -1,10 +1,16 @@
 {
     "UCF101-24": {
-        "ProgressNet": {
+        "ProgressNet(MAE)": {
             "'full-video' inputs": 13.90,
-            "'random-noise' inputs": 16.5,
+            "'random-noise' inputs": 15.46,
             "'video-segments' inputs": 26.11,
             "'frame-indices' inputs": 17.02
+        },
+        "ProgressNet(MSE)": {
+            "'full-video' inputs": 3.69,
+            "'random-noise' inputs": 3.54,
+            "'video-segments' inputs": 9.45,
+            "'frame-indices' inputs": 3.92
         },
         "static-0.5": {
             "'full-video' inputs": 25.0,
@@ -26,7 +32,13 @@
         }
     },
     "breakfast": {
-        "ProgressNet": {
+        "ProgressNet(MAE)": {
+            "'full-video' inputs": 20.3,
+            "'random-noise' inputs": 20.0,
+            "'video-segments' inputs": 25.9,
+            "'frame-indices' inputs": 20.5
+        },
+        "ProgressNet(MSE)": {
             "'full-video' inputs": 20.3,
             "'random-noise' inputs": 20.0,
             "'video-segments' inputs": 25.9,
@@ -52,9 +64,13 @@
         }
     },
     "Bars": {
-        "ProgressNet": {
+        "ProgressNet(MAE)": {
             "'full-video' inputs": 0.0629,
             "'video-segments' inputs": 1.119
+        },
+        "ProgressNet(MSE)": {
+            "'full-video' inputs": 0.00,
+            "'video-segments' inputs": 0.01
         },
         "static-0.5": {
             "'full-video' inputs": 25.0,

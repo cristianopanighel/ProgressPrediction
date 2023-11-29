@@ -32,7 +32,9 @@ class ProgressNet(nn.Module):
         elif backbone == "vgg11":
             self.backbone = models.vgg11().features
         elif backbone == "resnet18":
-            self.backbone = models.resnet18()
+            self.backbone = nn.Sequential(*list(models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1).children())[:-1])
+        elif backbone == "resnet152":
+            self.backbone = nn.Sequential(*list(models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1).children())[:-1])
         else:
             raise Exception(
                 f"Backbone {backbone} cannot be used for ProgressnetFlat")

@@ -161,27 +161,29 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
     plt.figure(figsize=(7.2, 5.2))
 
     data = [[] for _ in modes]
-    # xs_indices, networks = zip(
-    #     *[(i, key) for i, key in enumerate(results[dataset]) if key not in BASELINES])
-    networks = [key for key in results[dataset] if key not in BASELINES]
-    xs_indices = np.array([0])
-    for network in networks:
+    xs_indices, networks = zip(
+        *[(i, key) for i, key in enumerate(results[dataset]) if key not in BASELINES])
+    xs = np.array(list(xs_indices))
+    n = np.array(list(networks))
+
+    for network in n:
         for i, mode in enumerate(modes):
             if mode in results[dataset][network]:
                 data[i].append(results[dataset][network][mode])
             else:
                 data[i].append(0)
+    
     for i, (values, mode) in enumerate(zip(data, modes)):
-        bar_xs = xs_indices * SPACING + i * BAR_WIDTH
-        # bar_xs = xs_indices[0] * SPACING + i * BAR_WIDTH
+        bar_xs = xs * SPACING + i * BAR_WIDTH
         print(bar_xs, values, mode, dataset)
         plt.bar(bar_xs, values, width=BAR_WIDTH,
                 label=mode, color=MODE_COLOURS[mode])
-    xticks = xs_indices * SPACING + BAR_WIDTH * 0.5
-    # xticks = xs_indices[0] * SPACING + BAR_WIDTH * 0.5
+    # xticks = xs_indices * SPACING + BAR_WIDTH * 0.5
+    xticks = xs * SPACING + BAR_WIDTH * 0.5
     if dataset != 'Bars':
         plt.axhline(
             y=results[dataset]["average-index"]["'full-video' inputs"],
+            xmax=0.5,
             linestyle="-",
             label="average-index",
             color=(0.8, 0.7254901960784313, 0.4549019607843137),
@@ -189,6 +191,7 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
         )
         plt.axhline(
             y=results[dataset]["static-0.5"]["'full-video' inputs"],
+            xmax=0.5,
             linestyle="-",
             label="static-0.5",
             color=(0.8549019607843137, 0.5450980392156862, 0.7647058823529411),
@@ -196,6 +199,7 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
         )
         plt.axhline(
             y=results[dataset]["random"]["'full-video' inputs"],
+            xmax=0.5,
             linestyle="-",
             label="random",
             color=(0.5058823529411764, 0.4470588235294118, 0.7019607843137254),
@@ -204,14 +208,14 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
 
     plt.grid(axis='y')
     plt.axhline(y=0, linestyle='-', color='grey', zorder=-1)
-    plt.xticks(xticks, networks)
+    plt.xticks(xticks, n)
     if dataset == 'Bars':
-        yticks = [0, 1, 2, 3, 4]
+        yticks = [0, 0.5, 1, 1.5]
     else:
         yticks = [0, 5, 10, 15, 20, 25, 30, 35]
     plt.tick_params(axis='y', length=0)
     plt.yticks(yticks, [f'{tick}%' for tick in yticks])
-    plt.ylabel("MAE")
+    plt.ylabel("Error")
     plt.legend(loc='upper center', bbox_to_anchor=(
         0.5, -0.15), fancybox=False, shadow=False, ncol=3, fontsize = 'x-small')
     plt.tight_layout()
@@ -542,6 +546,7 @@ def main():
         os.makedirs('./plots/examples/', exist_ok=True)
     except:
         pass
+
     set_font_sizes(16, 18, 20)
     plot_baselines()
     plot_baseline_example()
