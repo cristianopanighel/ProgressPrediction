@@ -1,27 +1,53 @@
 #!/bin/sh
 
-# embed
-python main.py \
+### job name
+#SBATCH --job-name=pn_bf_script
+
+###
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=cristiano.panighel@studenti.unipd.it
+
+### Standard output and error
+#SBATCH --error=pn_bf_script.err
+#SBATCH --output=pn_bf_script.out
+
+### Number of tasks
+#SBATCH --ntasks=1
+
+### RAM requirement
+#SBATCH --mem=16G
+
+### Time limit for the job
+#SBATCH --begin=now
+
+### GPU request
+#SBATCH --gres=gpu:1
+#SBATCH --constraint=K20
+
+#SBATCH --qos=short
+#SBATCH --cpus-per-task=16
+
+### embed
+python3 main.py \
     --seed 42 \
+    --experiment_name progressnet_bf_scrambledegg_embed \
     --dataset breakfast \
     --data_dir rgb-images \
     --train_split all_scrambledegg.txt \
     --test_split test_scrambledegg_s1.txt \
     --batch_size 1 \
     --network progressnet \
-    --backbone vgg16 \
-    --load_experiment progressnet_flat_bf_scrambledegg_1 \
-    --load_iteration 500 \
+    --backbone vgg11 \
+    --load_backbone vgg11.pth \
     --embed \
     --embed_batch_size 32 \
     --embed_dir features/progressnet_scrambledegg_1 \
     --num_workers 1
 
-# sequence
-python main.py \
+### sequence
+python3 main.py \
     --seed 42 \
-    --experiment_name progressnet_bf_scrambledegg_1 \
-    --wandb_tags fold_s1 scrambledegg \
+    --experiment_name progressnet_bf_scrambledegg_sequence \
     --dataset breakfast \
     --data_dir features/progressnet_scrambledegg_1 \
     --train_split train_scrambledegg_s1.txt \
@@ -41,11 +67,10 @@ python main.py \
     --log_every 50 \
     --test_every 500
 
-# segment
-python main.py \
+### segment
+python3 main.py \
     --seed 42 \
-    --experiment_name progressnet_bf_scrambledegg_segment_1 \
-    --wandb_tags fold_s1 scrambledegg \
+    --experiment_name progressnet_bf_scrambledegg_segment \
     --dataset breakfast \
     --data_dir features/progressnet_scrambledegg_1 \
     --train_split train_scrambledegg_s1.txt \
@@ -66,11 +91,10 @@ python main.py \
     --log_every 50 \
     --test_every 500
 
-# indices
-python main.py \
+### indices
+python3 main.py \
     --seed 42 \
-    --experiment_name progressnet_bf_scrambledegg_indices_1 \
-    --wandb_tags fold_s1 scrambledegg \
+    --experiment_name progressnet_bf_scrambledegg_indices \
     --dataset breakfast \
     --data_dir features/progressnet_scrambledegg_1 \
     --train_split train_scrambledegg_s1.txt \

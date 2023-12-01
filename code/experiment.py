@@ -127,7 +127,8 @@ class Experiment:
     def save(self, save_dir: str) -> None:
         self.network.eval()
         criterion = nn.L1Loss(reduction='sum')
-        total_loss, count = 0, 0
+        l2_criterion = nn.MSELoss(reduction = 'sum')
+        total_loss, l2_loss, count = 0, 0, 0
         with torch.no_grad():
             for i, batch in enumerate(tqdm(self.testloader)):
                 progress = self.train_fn(
@@ -139,12 +140,17 @@ class Experiment:
                     return_results=True,
                 )
                 total_loss += criterion(progress * 100, batch[-1] * 100).item()
+                l2_loss += l2_criterion(progress, batch[-1]).item()
                 progress = torch.flatten(progress).tolist()
                 count += len(progress)
                 txt = '\n'.join(map(str, progress))
                 with open(f'./data/{save_dir}/{batch[0][0].replace("/", "_")}.txt', 'w+') as f:
+                    # is i the index of the image, of the folder or a simple counter that start from 0?
                     f.write(txt)
+        print("L1 loss")
         print(total_loss / count)
+        print("L2 loss")
+        print(l2_loss / count)
         self.network.train()
 
     @staticmethod

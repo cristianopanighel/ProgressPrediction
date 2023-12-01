@@ -1,6 +1,6 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=pn_bars
+#SBATCH --job-name=pn_bars_progresstest
 
 ###
 #SBATCH --mail-type=ALL
@@ -27,7 +27,7 @@
 #SBATCH --cpus-per-task=16
 
 wandb offline
-python3 /home/cpanighe/ProgressPrediction/code/main.py \
+srun python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
     --experiment_name pn_bars \
     --wandb_name pn_bars \
@@ -38,13 +38,12 @@ python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --test_split test.txt \
     --batch_size 1 \
     --iterations 50000 \
-    --network progressnet \
-    --backbone vgg16 \
-    --load_backbone vgg16.pth \
+    --network progresstest \
+    --backbone swintransformer \
+    --load_backbone None \
     --dropout_chance 0.5 \
     --lr_decay 1.0 \
     --lr_decay_every 1000000 \
     --log_every 100 \
     --test_every 1000 \
-    --num_workers 2 \
-    --no_resize
+    --num_workers 2

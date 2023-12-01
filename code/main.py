@@ -8,7 +8,7 @@ from arguments import parse_args, wandb_init
 from datasets import ImageDataset, UCFDataset, Subsample, Subsection, Truncate
 from dotenv import load_dotenv
 from experiment import Experiment
-from networks import ProgressNet
+from networks import ProgressNet, ProgressTest
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -134,16 +134,26 @@ def main():
         backbone_path = None
 
     print(backbone_path)
-    # if args.network == "progressnet":
-    network = ProgressNet(
-        args.pooling_layers,
-        args.roi_size,
-        args.dropout_chance,
-        args.embed_dim,
-        args.finetune,
-        args.backbone,
-        backbone_path,
-    )
+    if args.network == "progressnet":
+        network = ProgressNet(
+            args.pooling_layers,
+            args.roi_size,
+            args.dropout_chance,
+            args.embed_dim,
+            args.finetune,
+            args.backbone,
+            backbone_path,
+        )
+    else:
+        network = ProgressTest(
+            args.pooling_layers,
+            args.roi_size,
+            args.dropout_chance,
+            args.embed_dim,
+            args.finetune,
+            args.backbone,
+            backbone_path,
+        )
     # else:
     #     raise Exception(f"Network {args.network} does not exist")
 

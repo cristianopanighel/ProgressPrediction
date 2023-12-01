@@ -31,6 +31,8 @@ MODE_COLOURS = {
     "'random-noise' inputs": (0.8666666666666667, 0.5176470588235295, 0.3215686274509804),
     "'video-segments' inputs": (0.3333333333333333, 0.6588235294117647, 0.40784313725490196),
     "'frame-indices' inputs": (0.7686274509803922, 0.3058823529411765, 0.3215686274509804),
+    "MAE": (0.3333333333333333, 0.6588235294117647, 0.40784313725490196),
+    "MSE": (0.7686274509803922, 0.3058823529411765, 0.3215686274509804),
 }
 BASELINES = ["average-index", "static-0.5", "random"]
 LINEWIDTH = 3
@@ -60,38 +62,38 @@ def set_spines(enable: bool):
 
 
 # Datasets
-if not os.path.isfile('./data/lengths.json'):
-    os.makedirs('./data/', exist_ok=True)
-    print('loading ucf101')
-    ucf101 = {
-        'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
-        'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
-        'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
-    }
-    print('loading breakfast')
-    breakfast = {
-       'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
-       'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
-       'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
-    }
-    print('loading bars')
-    bars = {
-        'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"all.txt").lengths),
-        'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"train.txt").lengths)],
-        'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"test.txt").lengths)]
-    }
-    with open('./data/lengths.json', 'w+') as f:
-        json.dump({
-            'ucf101': ucf101,
-            'breakfast': breakfast,
-            'bars': bars
-        }, f)
-else:
-    with open('./data/lengths.json') as f:
-        data = json.load(f)
-    ucf101 = data['ucf101']
-    breakfast = data['breakfast']
-    bars = data['bars']
+# if not os.path.isfile('./data/lengths.json'):
+#     os.makedirs('./data/', exist_ok=True)
+#     print('loading ucf101')
+#     ucf101 = {
+#         'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
+#         'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
+#         'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
+#     }
+#     print('loading breakfast')
+#     breakfast = {
+#        'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
+#        'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
+#        'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
+#     }
+#     print('loading bars')
+#     bars = {
+#         'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"all.txt").lengths),
+#         'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"train.txt").lengths)],
+#         'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"test.txt").lengths)]
+#     }
+#     with open('./data/lengths.json', 'w+') as f:
+#         json.dump({
+#             'ucf101': ucf101,
+#             'breakfast': breakfast,
+#             'bars': bars
+#         }, f)
+# else:
+#     with open('./data/lengths.json') as f:
+#         data = json.load(f)
+#     ucf101 = data['ucf101']
+#     breakfast = data['breakfast']
+#     bars = data['bars']
 
 # Helper functions
 
@@ -155,6 +157,45 @@ def calculate_average_baseline(trains, tests):
 
 # Plots
 
+def plot_errors_class(results: Dict, dataset: str, modes: List[str], names: List[str]):
+    set_spines(False)
+    plt.figure(figsize=(7.2, 5.2))
+
+    data = [[] for _ in modes]
+    xs_indices, networks = zip(
+        *[(i, key) for i, key in enumerate(results[dataset]) if key not in BASELINES])
+    xs = np.array(list(xs_indices))
+    n = np.array(list(networks))
+
+    for network in n:
+        for i, mode in enumerate(modes):
+            if mode in results[dataset][network]:
+                data[i].append(results[dataset][network][mode])
+            else:
+                data[i].append(0)
+    
+    for i, (values, mode) in enumerate(zip(data, modes)):
+        bar_xs = xs * SPACING + i * BAR_WIDTH
+        print(bar_xs, values, mode, dataset)
+        plt.bar(bar_xs, values, width=BAR_WIDTH,
+                label=mode, color=MODE_COLOURS[mode])
+    # xticks = xs_indices * SPACING + BAR_WIDTH * 0.5
+    xticks = xs * SPACING + BAR_WIDTH * 0.5
+    plt.grid(axis='y')
+    plt.axhline(y=0, linestyle='-', color='grey', zorder=-1)
+    plt.xticks(rotation=90)
+    plt.xticks(xticks, n)
+    yticks = [0, 5, 10, 15, 20, 25]
+    plt.tick_params(axis='y', length=0)
+    plt.yticks(yticks, [f'{tick}%' for tick in yticks])
+    plt.ylabel("Error")
+    plt.legend(loc='upper left', fancybox=False, shadow=False, ncol=3, fontsize = 'x-small')
+    plt.tight_layout()
+    filename = f"./plots/results/{dataset}_{'_'.join(names).replace(' ', '_')}"
+    plt.show()
+    plt.savefig(f"{filename}.{FILE}")
+    plt.clf()
+    set_spines(True)
 
 def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[str]):
     set_spines(False)
@@ -539,39 +580,41 @@ FILE = 'pdf' if args.pdf else 'png'
 
 
 def main():
-    try:
-        os.makedirs('./plots/', exist_ok=True)
-        os.makedirs('./plots/bars/', exist_ok=True)
-        os.makedirs('./plots/results/', exist_ok=True)
-        os.makedirs('./plots/examples/', exist_ok=True)
-    except:
-        pass
+    #try:
+    #    os.makedirs('./plots/', exist_ok=True)
+    #    os.makedirs('./plots/bars/', exist_ok=True)
+    #    os.makedirs('./plots/results/', exist_ok=True)
+    #    os.makedirs('./plots/examples/', exist_ok=True)
+    #except:
+    #    pass
 
-    set_font_sizes(16, 18, 20)
-    plot_baselines()
-    plot_baseline_example()
+    #set_font_sizes(16, 18, 20)
+    #plot_baselines()
+    #plot_baseline_example()
 
-    dataset_visualisations()
-    dataset_statistics()
+    #dataset_visualisations()
+    #dataset_statistics()
 
     # result plots
-    results = load_results(os.environ.get("RESULTS"))
-    for dataset in ["UCF101-24"]:#, "breakfast"]:
-        plot_result_bar(results, dataset, [
-                        "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
-        plot_result_bar(results, dataset, [
-                        "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
-    plot_result_bar(results, "Bars", [
-                    "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
+    #results = load_results(os.environ.get("RESULTS"))
+    #for dataset in ["UCF101-24"]:#, "breakfast"]:
+    #    plot_result_bar(results, dataset, [
+    #                    "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
+    #    plot_result_bar(results, dataset, [
+    #                    "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
+    #plot_result_bar(results, "Bars", [
+    #                "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
     # average index baseline
-    set_font_sizes()
+    #set_font_sizes()
     # dataset statistics
-    plot_dataset_lengths()
+    #plot_dataset_lengths()
     # syntethic dataset example
-    plot_synthetic(4, [0, 3, 7, 11, 15])
+    #plot_synthetic(4, [0, 3, 7, 11, 15])
     # example progress predictions
-    set_font_sizes(16, 18, 20)
-    visualise_results()
+    #set_font_sizes(16, 18, 20)
+    #visualise_results()
+    errors = load_results(os.environ.get("ERRORS"))
+    plot_errors_class(errors, "UCF101-24", ['MAE', 'MSE'], ['MAE', 'MSE'])
 
 
 if __name__ == '__main__':
