@@ -6,7 +6,7 @@ from torchvision.ops import roi_align
 from typing import List
 
 from .pyramidpooling import SpatialPyramidPooling
-
+from .swintransformer import SwinTransformer
 
 class ProgressNet(nn.Module):
     def __init__(
@@ -20,25 +20,29 @@ class ProgressNet(nn.Module):
         backbone_path: str = None,
     ) -> None:
         super().__init__()
-        # if torch.backends.mps.is_available():
-        #    self.device = "mps"
+        shape = 512
         if torch.cuda.is_available():
             self.device = "cuda"
         else:
             self.device = "cpu"
 
-        if backbone == "vgg16":
-            self.backbone = models.vgg16().features
-        elif backbone == "vgg11":
-            self.backbone = models.vgg11().features
-        elif backbone == "resnet18":
-            self.backbone = nn.Sequential(*list(models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1).children())[:-1])
-        elif backbone == "resnet152":
-            self.backbone = nn.Sequential(*list(models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1).children())[:-1])
-        else:
-            raise Exception(
-                f"Backbone {backbone} cannot be used for ProgressnetFlat")
-
+        match backbone:
+            case "vgg11":
+                self.backbone = models.vgg11().features
+            case "vgg16":
+                self.backbone = models.vgg16().features
+            case "resnet18":
+                self.backbone = nn.Sequential(*list(models.resnet18(weights=models.ResNet18_Weights.IMAGENET1K_V1).children())[:-1])
+            case "resnet152":
+                self.backbone = nn.Sequential(*list(models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1).children())[:-1])
+                shape = 2048
+            case "swintransformer":
+                self.backbone = SwinTransformer()
+                shape = 768
+            case _:
+                raise Exception(
+                    f"Backbone {backbone} cannot be used for Progressnet")
+        
         if backbone_path:
             self.backbone.load_state_dict(torch.load(backbone_path))
 
@@ -49,10 +53,10 @@ class ProgressNet(nn.Module):
         self.roi_size = roi_size
 
         self.spp = SpatialPyramidPooling(pooling_layers)
-        self.spp_fc = nn.Linear(512 * pooling_size, embed_dim)
+        self.spp_fc = nn.Linear(shape * pooling_size, embed_dim)
         self.spp_dropout = nn.Dropout(p=dropout_chance)
 
-        self.roi_fc = nn.Linear(512 * (roi_size**2), embed_dim)
+        self.roi_fc = nn.Linear(shape * (roi_size**2), embed_dim)
         self.roi_dropout = nn.Dropout(p=dropout_chance)
 
         self.fc7 = nn.Linear(embed_dim * 2, 64)
@@ -73,9 +77,6 @@ class ProgressNet(nn.Module):
         # B = batch size, S = sequence size, C = channels, H = Height, W = width
         B, S, C, H, W = frames.shape
         num_samples = B * S
-
-        # print(boxes)
-        # print(boxes.shape)
 
         if boxes is None:
             boxes = torch.FloatTensor([0, 0, 224, 224])

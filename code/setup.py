@@ -18,9 +18,6 @@ def create_networks():
     vgg11 = models.vgg11(weights=models.VGG11_Weights.IMAGENET1K_V1).features
     torch.save(vgg11.state_dict(), './vgg11.pth')
 
-    # vit16 = models.vit_b_16(weights=models.ViT_B_16_Weights.IMAGENET1K_V1)
-    # torch.save(vit16.state_dict(), './vit16.pth')
-
 def main() -> None:
     random.seed(42)
     create_networks()

@@ -2,18 +2,17 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.transforms as T
+
 from einops import rearrange
-from PIL import Image
 
-
-def get_device():
+def get_device() -> torch.device:
+    # if torch.backends.mps.is_available():
+    #    device = "mps"
     if torch.cuda.is_available():
         device = "cuda"
     else:
         device = "cpu"
-    return device
-
+    return torch.device(device)
 
 class SwinEmbedding(nn.Module):
 
@@ -186,23 +185,7 @@ class SwinTransformer(nn.Module):
         x = self.PatchMerge3(x)
         x = self.Stage4(x)
         x = rearrange(x, 'b c o-> b o c')
+        seq_length = x.shape[0]
         newarr = x.flatten()
-        newarr = newarr.reshape(16, 768, 7, 7)
-        print(newarr.shape)
-        print(x.shape)  # it should be something like [16, 512, 7, 7]
-        print(get_device())
-        print()
+        newarr = newarr.reshape(seq_length, 768, 7, 7)
         return newarr
-
-
-# def main():
-#     img = Image.open(
-#         '/Users/cristianopanighel/Desktop/Datasets/bars/rgb-images/00000/00009.jpg')
-#     img = T.Resize((224, 224))(T.ToTensor()(img))
-#     img = img[None, :]  # .cuda()
-#     model = SwinTransformer()  # .cuda()
-#     print(model(img).shape)
-#
-#
-# if __name__ == '__main__':
-#     main()

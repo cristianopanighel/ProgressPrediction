@@ -17,10 +17,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--wandb_name", type=str, default=None)
     parser.add_argument("--wandb_disable", action="store_true")
     # data
-    parser.add_argument("--dataset", type=str, default="bars/")
+    parser.add_argument("--dataset", type=str, default="ucf24") #bars
     # parser.add_argument("--data_dir", type=str,
     #                     default="features/i3d_embeddings/")
-    parser.add_argument("--data_dir", type=str, default="rgb-images/")
+    parser.add_argument("--data_dir", type=str, default="rgb-images")
     # use images instead of image sequences
     parser.add_argument("--flat", action="store_true")
     # use bounding box data (available for UCF101-24)
@@ -57,13 +57,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--network",
         type=str,
-        default="progressnet",
+        default="progressnet", # progressnet
     )
     parser.add_argument(
         "--backbone",
         type=str,
-        default='vgg11',
-        choices=["vgg16", 'vgg11', "resnet18", "resnet152"],
+        default='swintransformer',
+        choices=["vgg16", 'vgg11', "resnet18", "resnet152", "swintransformer"],
     )
     parser.add_argument("--load_backbone", type=str, default=None)
     # network parameters
