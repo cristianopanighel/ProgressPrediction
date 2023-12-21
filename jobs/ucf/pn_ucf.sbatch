@@ -1,6 +1,6 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=pn_ucf
+#SBATCH --job-name=pn_ucf_progresstest
 
 ###
 #SBATCH --mail-type=ALL
@@ -41,12 +41,12 @@ python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --batch_size 1 \
     --iterations 50000 \
     --network progressnet \
-    --backbone vgg11 \
-    --load_backbone vgg11.pth \
+    --backbone swintransformer \
+    --load_backbone None \
     --dropout_chance 0.5 \
     --lr_decay 1.0 \
     --lr_decay_every 1000000 \
     --log_every 100 \
     --test_every 2500 \
     --num_workers 2 \
-    --max_length 600 
+    --max_length 600

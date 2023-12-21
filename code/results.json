@@ -33,16 +33,16 @@
     },
     "breakfast": {
         "ProgressNet(MAE)": {
-            "'full-video' inputs": 20.3,
-            "'random-noise' inputs": 20.0,
-            "'video-segments' inputs": 25.9,
-            "'frame-indices' inputs": 20.5
+            "'full-video' inputs": 21.71,
+            "'random-noise' inputs": 0.0,
+            "'video-segments' inputs": 0.0,
+            "'frame-indices' inputs": 0.0
         },
         "ProgressNet(MSE)": {
-            "'full-video' inputs": 20.3,
-            "'random-noise' inputs": 20.0,
-            "'video-segments' inputs": 25.9,
-            "'frame-indices' inputs": 20.5
+            "'full-video' inputs": 8.11,
+            "'random-noise' inputs": 0.0,
+            "'video-segments' inputs": 0.0,
+            "'frame-indices' inputs": 0.0
         },
         "static-0.5": {
             "'full-video' inputs": 25.00,

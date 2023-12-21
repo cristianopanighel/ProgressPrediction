@@ -18,6 +18,12 @@ def create_networks():
     vgg11 = models.vgg11(weights=models.VGG11_Weights.IMAGENET1K_V1).features
     torch.save(vgg11.state_dict(), './vgg11.pth')
 
+    resnext = nn.Sequential(*list(models.resnext50_32x4d(weights = models.ResNeXt50_32X4D_Weights.IMAGENET1K_V1).children())[:-1])
+    torch.save(resnext.state_dict(), './resnext50.pth')
+    
+    swin = nn.Sequential(*list(models.swin_s(weights = models.Swin_S_Weights.IMAGENET1K_V1).children())[:-3])
+    torch.save(swin.state_dict(), './swintransformer.pth')
+    
 def main() -> None:
     random.seed(42)
     create_networks()

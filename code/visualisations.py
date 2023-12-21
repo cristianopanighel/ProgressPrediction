@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 
-from datasets import ImageDataset, UCFDataset, Middle
+from datasets import ImageDataset, FeatureDataset, UCFDataset, Middle
 from dotenv import load_dotenv
 from PIL import Image
 from typing import Dict, List
@@ -24,6 +24,8 @@ BARS = os.environ.get("BARS")
 UCF_IMAGES = os.environ.get("UCF_IMAGES")
 UCF = os.environ.get("UCF")
 UCF_SEGMENTS = os.environ.get("UCF_SEGMENTS")
+BREAKFAST_IMAGES = os.environ.get("BREAKFAST_IMAGES")
+BREAKFAST = os.environ.get("BREAKFAST")
 BAR_WIDTH = 0.5
 SPACING = 1.5
 MODE_COLOURS = {
@@ -62,38 +64,38 @@ def set_spines(enable: bool):
 
 
 # Datasets
-# if not os.path.isfile('./data/lengths.json'):
-#     os.makedirs('./data/', exist_ok=True)
-#     print('loading ucf101')
-#     ucf101 = {
-#         'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
-#         'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
-#         'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
-#     }
-#     print('loading breakfast')
-#     breakfast = {
-#        'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
-#        'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
-#        'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
-#     }
-#     print('loading bars')
-#     bars = {
-#         'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"all.txt").lengths),
-#         'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"train.txt").lengths)],
-#         'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"test.txt").lengths)]
-#     }
-#     with open('./data/lengths.json', 'w+') as f:
-#         json.dump({
-#             'ucf101': ucf101,
-#             'breakfast': breakfast,
-#             'bars': bars
-#         }, f)
-# else:
-#     with open('./data/lengths.json') as f:
-#         data = json.load(f)
-#     ucf101 = data['ucf101']
-#     breakfast = data['breakfast']
-#     bars = data['bars']
+if not os.path.isfile('./data/lengths.json'):
+    os.makedirs('./data/', exist_ok=True)
+    print('loading ucf101')
+    ucf101 = {
+        'all': sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"all.txt").lengths),
+        'train': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"train.txt").lengths)],
+        'test': [sorted(UCFDataset(os.path.join(DATA_ROOT, "ucf24"), "rgb-images", f"test.txt").lengths)]
+    }
+    print('loading breakfast')
+    breakfast = {
+       'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"all.txt").lengths),
+       'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"train_s{i}.txt").lengths) for i in range(1, 5)],
+       'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "breakfast"), "rgb-images", f"test_s{i}.txt").lengths) for i in range(1, 5)],
+    }
+    print('loading bars')
+    bars = {
+        'all': sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"all.txt").lengths),
+        'train': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"train.txt").lengths)],
+        'test': [sorted(ImageDataset(os.path.join(DATA_ROOT, "bars"), "rgb-images", f"test.txt").lengths)]
+    }
+    with open('./data/lengths.json', 'w+') as f:
+        json.dump({
+            'ucf101': ucf101,
+            'breakfast': breakfast,
+            'bars': bars
+        }, f)
+else:
+    with open('./data/lengths.json') as f:
+        data = json.load(f)
+    ucf101 = data['ucf101']
+    breakfast = data['breakfast']
+    bars = data['bars']
 
 # Helper functions
 
@@ -475,17 +477,7 @@ def stats(dataset: str, splitfiles: List[str], length=False):
 
 
 def tube_stats(splitfile: str):
-    dataset = UCFDataset(os.path.join(DATA_ROOT, "ucf24"),
-                         "rgb-images",
-                         splitfile,
-                         True,
-                         False,
-                         1,
-                         False,
-                         False,
-                         1,
-                         "none",
-                         1,)
+    dataset = FeatureDataset(os.path.join(DATA_ROOT, 'ucf24'), 'features/vgg11embed', splitfile, False, 1, False, False, 1, 'none', 1)
     counts_per_class = {}
     num_frames_per_class = {}
     total = 0
@@ -515,7 +507,7 @@ def tube_stats(splitfile: str):
 
 def dataset_statistics():
     stats('ucf24', ['all', 'train', 'test'], length=True)
-    #tube_stats('all.txt')
+    tube_stats('test_embed.txt')
     stats('breakfast', ['all'], length=True)
 
 
@@ -557,21 +549,18 @@ def visualise_results():
        visualise_video(
            os.path.join(UCF_IMAGES,f'{index}'), timestamp,
            [('ProgressNet (full-video)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            ('ProgressNet (full-video)',
+            ('ProgressNet (video-segments)',
              os.path.join(UCF_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
             ('average-index', f'./data/ucf_baseline.txt', '-')],
            f'ucf_video_{index.replace("/", "_")}', 1
        )
-    # for index, timestamp in zip(['P12_cam01_P12_pancake', 'P07_webcam01_P07_sandwich'], [150, 65]):
+    # for index, timestamp in zip(['P12_cam01_P12_pancake', 'P07_webcam01_P07_sandwich'], [(0,2870), (0,2135)]):
     #     visualise_video(
-    #         os.path.join(DATA_ROOT, f'breakfast/rgb-images/{index}'), timestamp,
-    #         [('ResNet-LSTM', f'./data/breakfast/lstm_bf_random/{index.replace("/", "_")}.txt', '-.'),
-    #          ('RSDNet', f'./data/breakfast/rsd_bf_random/{index.replace("/", "_")}.txt', '-.'),
-    #          ('ProgressNet', f'./data/breakfast/pn_bf_random/{index.replace("/", "_")}.txt', '-.'),
-    #          ('average-index', f'./data/bf_baseline_sampled.txt', '-')],
-    #          f'bf_video_{index.replace("/", "_")}', 1, subsample=15,
+    #         os.path.join(BREAKFAST_IMAGES, f'{index}'), timestamp,
+    #         [('ProgressNet (full-video)', os.path.join(BREAKFAST, f'{index.replace("/", "_")}.txt'), '-.'),
+    #          ('average-index', f'./data/bf_baseline.txt', '-')],
+    #          f'bf_video_{index.replace("/", "_")}', 1, subsample = 15
     #     )
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--pdf', action='store_true')
@@ -580,39 +569,39 @@ FILE = 'pdf' if args.pdf else 'png'
 
 
 def main():
-    #try:
-    #    os.makedirs('./plots/', exist_ok=True)
-    #    os.makedirs('./plots/bars/', exist_ok=True)
-    #    os.makedirs('./plots/results/', exist_ok=True)
-    #    os.makedirs('./plots/examples/', exist_ok=True)
-    #except:
-    #    pass
+    try:
+        os.makedirs('./plots/', exist_ok=True)
+        os.makedirs('./plots/bars/', exist_ok=True)
+        os.makedirs('./plots/results/', exist_ok=True)
+        os.makedirs('./plots/examples/', exist_ok=True)
+    except:
+        pass
 
-    #set_font_sizes(16, 18, 20)
-    #plot_baselines()
-    #plot_baseline_example()
+    set_font_sizes(16, 18, 20)
+    plot_baselines()
+    plot_baseline_example()
 
-    #dataset_visualisations()
-    #dataset_statistics()
+    dataset_visualisations()
+    dataset_statistics()
 
     # result plots
-    #results = load_results(os.environ.get("RESULTS"))
-    #for dataset in ["UCF101-24"]:#, "breakfast"]:
-    #    plot_result_bar(results, dataset, [
-    #                    "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
-    #    plot_result_bar(results, dataset, [
-    #                    "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
-    #plot_result_bar(results, "Bars", [
-    #                "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
+    results = load_results(os.environ.get("RESULTS"))
+    for dataset in ["UCF101-24"]:#, "breakfast"]:
+        plot_result_bar(results, dataset, [
+                        "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
+        plot_result_bar(results, dataset, [
+                        "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
+    plot_result_bar(results, "Bars", [
+                    "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
     # average index baseline
-    #set_font_sizes()
+    set_font_sizes()
     # dataset statistics
-    #plot_dataset_lengths()
+    plot_dataset_lengths()
     # syntethic dataset example
-    #plot_synthetic(4, [0, 3, 7, 11, 15])
+    plot_synthetic(4, [0, 3, 7, 11, 15])
     # example progress predictions
-    #set_font_sizes(16, 18, 20)
-    #visualise_results()
+    set_font_sizes(16, 18, 20)
+    visualise_results()
     errors = load_results(os.environ.get("ERRORS"))
     plot_errors_class(errors, "UCF101-24", ['MAE', 'MSE'], ['MAE', 'MSE'])
 

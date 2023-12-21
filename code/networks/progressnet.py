@@ -37,8 +37,12 @@ class ProgressNet(nn.Module):
                 self.backbone = nn.Sequential(*list(models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V1).children())[:-1])
                 shape = 2048
             case "swintransformer":
-                self.backbone = SwinTransformer()
+                # self.backbone = SwinTransformer()
+                self.backbone = nn.Sequential(*list(models.swin_s(weights = models.Swin_S_Weights.IMAGENET1K_V1).children())[:-3])
                 shape = 768
+            case "resnext50":
+                self.backbone = nn.Sequential(*list(models.resnext50_32x4d(weights = models.ResNeXt50_32X4D_Weights.IMAGENET1K_V1).children())[:-1])
+                shape = 2048
             case _:
                 raise Exception(
                     f"Backbone {backbone} cannot be used for Progressnet")

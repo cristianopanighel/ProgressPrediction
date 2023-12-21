@@ -65,7 +65,7 @@ class PyramidPooling(nn.Module):
             if i == 0:
                 spp = x.view(num_sample, -1)
             else:
-                spp = torch.cat((spp, x.view(num_sample, -1)), 1)
+                spp = torch.cat((spp, x.reshape(num_sample, -1)), 1)
 
         return spp
 
