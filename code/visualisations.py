@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 
-from datasets import ImageDataset, FeatureDataset, UCFDataset, Middle
+from .datasets import ImageDataset, FeatureDataset, UCFDataset, Middle
 from dotenv import load_dotenv
 from PIL import Image
 from typing import Dict, List
@@ -24,6 +24,8 @@ BARS = os.environ.get("BARS")
 UCF_IMAGES = os.environ.get("UCF_IMAGES")
 UCF = os.environ.get("UCF")
 UCF_SEGMENTS = os.environ.get("UCF_SEGMENTS")
+UCF_MASK = os.environ.get("UCF_MASK")
+UCF_TF = os.environ.get("UCF_TF")
 BREAKFAST_IMAGES = os.environ.get("BREAKFAST_IMAGES")
 BREAKFAST = os.environ.get("BREAKFAST")
 BAR_WIDTH = 0.5
@@ -267,7 +269,6 @@ def plot_result_bar(results: Dict, dataset: str, modes: List[str], names: List[s
     plt.clf()
     set_spines(True)
 
-
 def plot_baselines():
     bf_predictions, bf_index_loss, bf_static_loss, bf_random_loss = calculate_average_baseline(
         breakfast['train'], breakfast['test'])
@@ -315,7 +316,6 @@ def plot_baselines():
     plt.savefig(f"./plots/avg_index_baseline.{FILE}")
     plt.clf()
 
-
 def plot_baseline_example():
     predictions, _, _, _ = calc_baselines([10, 20, 30], [50])
 
@@ -334,17 +334,17 @@ def plot_baseline_example():
     plt.savefig(f"./plots/avg_index_example.{FILE}")
     plt.clf()
 
-
 def make_length_plot(lengths, ax: plt.Axes, title: str, bucket_size: int = 10):
     buckets = {}
+    mean = np.percentile(lengths, 50)
     for length in lengths:
         length = math.floor(length / bucket_size) * bucket_size
         if length not in buckets:
             buckets[length] = 0
         buckets[length] += 1
     ax.bar(buckets.keys(), buckets.values(), width=bucket_size)
+    ax.axvline(mean, color='red', linestyle = ':')
     ax.set_title(title, y=TITLE_Y_OFFSET*1.1, x=TITLE_X_OFFSET)
-
 
 def plot_dataset_lengths():
     figure, axs = plt.subplots(1, 3, figsize=(6.4 * 2, 4.4))
@@ -360,7 +360,6 @@ def plot_dataset_lengths():
     plt.tight_layout()
     plt.savefig(f'./plots/dataset_lengths.{FILE}')
     plt.clf()
-
 
 def plot_synthetic(video_index: int, frame_indices: List[int]):
     data_dir = os.environ.get("BARS_IMAGES")
@@ -383,7 +382,6 @@ def plot_synthetic(video_index: int, frame_indices: List[int]):
     plt.tight_layout()
     plt.savefig(f'./plots/bars.{FILE}')
     plt.clf()
-
 
 def visualise_video(video_dir: str, timestamps: List[int], result_paths: List[str], video_name: str, N: int, offset: int = 0, subsample: int = 1):
     gs = plt.GridSpec(len(timestamps), 4)
@@ -435,7 +433,6 @@ def visualise_video(video_dir: str, timestamps: List[int], result_paths: List[st
     plt.savefig(f'./plots/examples/{video_name}.{FILE}')
     plt.clf()
 
-
 def stats(dataset: str, splitfiles: List[str], length=False):
     root = os.path.join(DATA_ROOT, dataset)
     for splitfile in splitfiles:
@@ -475,7 +472,6 @@ def stats(dataset: str, splitfiles: List[str], length=False):
             print(
                 f'{activity_class}: {counts_per_class[activity_class]} ({num_frames_per_class[activity_class] / counts_per_class[activity_class]})')
 
-
 def tube_stats(splitfile: str):
     dataset = FeatureDataset(os.path.join(DATA_ROOT, 'ucf24'), 'features/vgg11embed', splitfile, False, 1, False, False, 1, 'none', 1)
     counts_per_class = {}
@@ -504,21 +500,19 @@ def tube_stats(splitfile: str):
         print(
             f'{activity_class}: {counts_per_class[activity_class]} ({num_frames_per_class[activity_class] / counts_per_class[activity_class]})')
 
-
 def dataset_statistics():
     stats('ucf24', ['all', 'train', 'test'], length=True)
     tube_stats('test_embed.txt')
     stats('breakfast', ['all'], length=True)
 
-
 def dataset_visualisations():
     transform = transforms.Resize((240, 320))
     dataset = UCFDataset(os.path.join(DATA_ROOT, "ucf24"),
                          "rgb-images", f"small.txt", sample_transform=Middle())
-    num_activities = len(dataset) // 12
-
+    num_activities = len(dataset) // 5
+    # plt.rcParams.update({'font.size' : 10})
     frames = []
-    fig, axs = plt.subplots(num_activities, 12, figsize=(24, 4.8*(24/12)))
+    fig, axs = plt.subplots(nrows = num_activities, ncols = 5, layout = 'constrained' , figsize=(6.4, 4.8*(24/5)))
     unique_names = []
     for name, frame, _ in dataset:
         frames.append(transform(frame[0]))
@@ -531,12 +525,13 @@ def dataset_visualisations():
         ax.set_xticks([], minor=True)
         ax.set_yticks([])
         ax.set_yticks([], minor=True)
+    for (unique_name, ax) in zip(unique_names, axs[:, 0]):
+        ax.text(-600, 150, unique_name)
     plt.tight_layout()
     plt.subplots_adjust(wspace=0.1, hspace=0.1)
     plt.savefig('./plots/ucf_visualisations.png')
     plt.clf()
     plt.close()
-
 
 def visualise_results():
     for index, timestamp in zip(['00015'], [(0, 15)]):
@@ -545,12 +540,13 @@ def visualise_results():
             [('ProgressNet', os.path.join(BARS,f'{index}.txt'), '-.')],
             f'bars_video{index}', 1
         )
-    for index, timestamp in zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
+    for index, timestamp in zip(['GolfSwing/v_GolfSwing_g01_c03'], [(0,25)]): #zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
        visualise_video(
            os.path.join(UCF_IMAGES,f'{index}'), timestamp,
            [('ProgressNet (full-video)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            ('ProgressNet (video-segments)',
-             os.path.join(UCF_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            #('ProgressNet (video-segments)',os.path.join(UCF_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
+             ('ProgressNet (mask)', os.path.join(UCF_MASK,f'{index.replace("/", "_")}_0.txt'), '-.'),
+             ('ProgressNet (tf)', os.path.join(UCF_TF,f'{index.replace("/", "_")}_0.txt'), '-.'),
             ('average-index', f'./data/ucf_baseline.txt', '-')],
            f'ucf_video_{index.replace("/", "_")}', 1
        )

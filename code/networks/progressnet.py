@@ -1,12 +1,16 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
+
+from .positional_encoding import PositionalEncoding
+
+from .pyramidpooling import SpatialPyramidPooling
+from torch import nn
 from torchvision import models
 from torchvision.ops import roi_align
 from typing import List
 
-from .pyramidpooling import SpatialPyramidPooling
-from .swintransformer import SwinTransformer
+# from .swintransformer import SwinTransformer
+# from torchvision.transforms import v2
 
 class ProgressNet(nn.Module):
     def __init__(
@@ -43,6 +47,9 @@ class ProgressNet(nn.Module):
             case "resnext50":
                 self.backbone = nn.Sequential(*list(models.resnext50_32x4d(weights = models.ResNeXt50_32X4D_Weights.IMAGENET1K_V1).children())[:-1])
                 shape = 2048
+            # case "r2_1":
+            #     self.backbone = nn.Sequential(*list(models.video.r2plus1d_18(weights = models.video.R2Plus1D_18_Weights).children())[:-1])
+            
             case _:
                 raise Exception(
                     f"Backbone {backbone} cannot be used for Progressnet")
@@ -52,6 +59,12 @@ class ProgressNet(nn.Module):
 
         for param in self.parameters():
             param.requires_grad = False
+
+        # self.transforms = v2.Compose([
+        #     v2.RandomResizedCrop(size=(224, 224), antialias=True),
+        #     v2.RandomHorizontalFlip(p=0.5),
+        #     v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        #     ])
 
         pooling_size = sum(map(lambda x: x**2, pooling_layers))
         self.roi_size = roi_size
@@ -69,11 +82,24 @@ class ProgressNet(nn.Module):
         self.lstm1 = nn.GRU(64, 32, batch_first=True)
         self.lstm2 = nn.GRU(32, 32, batch_first=True)
 
+        # dim = 64
+        # num_heads = 8 
+        # self.multihead_attn = nn.MultiheadAttention(dim, num_heads, batch_first = True)
+        
+        # input_size = 64
+        # num_layers = 6
+        # num_heads = 8
+        # self.model = nn.Transformer(input_size, num_heads, num_layers, batch_first=True)
+       
         if finetune:
             for param in self.parameters():
                 param.requires_grad = False
 
+        # GRU
         self.fc8 = nn.Linear(32, 1)
+        
+        #Transformer and MultiheadAttention
+        # self.fc8 = nn.Linear(64, 1)
 
         self.hidden1, self.hidden2 = None, None
 
@@ -83,13 +109,18 @@ class ProgressNet(nn.Module):
         num_samples = B * S
 
         if boxes is None:
-            boxes = torch.FloatTensor([0, 0, 224, 224])
+            # Breakfast
+            # boxes = torch.FloatTensor([0, 0, 320, 240])
+            boxes = torch.FloatTensor([0, 0, 224, 224]) # H, W
             boxes = boxes.repeat(num_samples, 1)
             boxes = boxes.to(self.device)
 
         frames = frames.reshape(num_samples, C, H, W)
+        # frames = frames.reshape(B, C, num_samples, H, W)
         boxes = boxes.reshape(num_samples, 4)
 
+        # frames = self.transforms(frames)
+        
         frames = self.backbone(frames)
 
         spp_pooled = self.spp(frames)
@@ -113,12 +144,34 @@ class ProgressNet(nn.Module):
         data = self.fc7_dropout(data)
         data = torch.relu(data)
 
+        print()
+        # Standard GRU
         data = data.reshape(B, S, -1)
         data, self.hidden1 = self.lstm1(data, self.hidden1)
         data, self.hidden2 = self.lstm2(data, self.hidden2)
         data = data.reshape(num_samples, -1)
         data = self.fc8(data)
         data = torch.sigmoid(data)
+
+        # data_mask = nn.Transformer.generate_square_subsequent_mask(num_samples)
+
+        # Transformer
+        # _mask filter attention wieghts, key_padding_mask marks padding tokens in the sequence
+        # data = data.reshape(B, S, -1)
+        # data = [bias, seq_length, -1]
+        # pe = PositionalEncoding(64, 1, 0.5)
+        # data_pe = pe(data)
+        # data = self.model(data_pe, data, tgt_mask = data_mask)
+        # data = data.reshape(num_samples, -1)
+        # data = self.fc8(data)
+        # data = torch.sigmoid(data)
+
+        # Multihead attention
+        # data = data.reshape(B, S, -1)
+        # data, attn_weights = self.multihead_attn(data, data, data, attn_mask = data_mask, is_causal = True)
+        # data = data.reshape(num_samples, -1)
+        # data = self.fc8(data)
+        # data = torch.sigmoid(data)
 
         return data.reshape(B, S)
 

@@ -62,8 +62,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--backbone",
         type=str,
-        default='swintransformer',
-        choices=["vgg16", 'vgg11', "resnet18", "resnet152", "swintransformer"],
+        default='vgg11',
+        choices=["vgg16", 'vgg11', "resnet18", "resnet152", "swintransformer", "resnext50"],
     )
     parser.add_argument("--load_backbone", type=str, default=None)
     # network parameters

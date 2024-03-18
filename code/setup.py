@@ -1,5 +1,4 @@
 import random
-from networkx import weakly_connected_components
 import torch
 import torch.nn as nn
 

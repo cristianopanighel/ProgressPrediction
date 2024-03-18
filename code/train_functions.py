@@ -79,44 +79,6 @@ def train_progress(network, criterion, batch, max_length, device, optimizer=None
         "count": S,
     }
 
-
-def train_rsd(network, criterion, batch, max_length, device, optimizer=None, return_results=False):
-    l2_loss = nn.MSELoss(reduction="sum")
-    l1_loss = nn.L1Loss(reduction="sum")
-    smooth_l1_loss = nn.SmoothL1Loss(reduction="sum")
-
-    rsd = batch[-2] / network.rsd_normalizer
-    progress = batch[-1]
-    S = progress.shape[1]
-
-    data = batch[1:-2]
-    data = tuple([d.to(device) for d in data])
-
-    predicted_rsd, predicted_progress = network(*data)
-    if return_results:
-        return predicted_progress.cpu()
-    rsd = rsd.to(device)
-    progress = progress.to(device)
-    if optimizer:
-        optimizer.zero_grad()
-        loss = criterion(predicted_rsd, rsd) + criterion(predicted_progress, progress)
-        loss.backward()
-        optimizer.step()
-
-    return {
-        "rsd_l1_loss": l1_loss(predicted_rsd, rsd),
-        "rsd_smooth_l1_loss": smooth_l1_loss(predicted_rsd, rsd),
-        "rsd_l2_loss": l2_loss(predicted_rsd, rsd),
-        "rsd_normal_l1_loss": l1_loss(
-            predicted_rsd * network.rsd_normalizer, rsd * network.rsd_normalizer
-        ),
-        "l1_loss": l1_loss(predicted_progress * 100, progress * 100),
-        "smooth_l1_loss": smooth_l1_loss(predicted_progress, progress),
-        "l2_loss": l2_loss(predicted_progress, progress),
-        "count": S,
-    }
-
-
 def embed_frames(network, batch, device, batch_size: int):
     data = batch[1:-1]
     data = tuple([torch.split(d.squeeze(dim=0), batch_size) for d in data])

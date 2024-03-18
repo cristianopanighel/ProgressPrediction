@@ -8,12 +8,12 @@ from arguments import parse_args, wandb_init
 from datasets import ImageDataset, UCFDataset, Subsample, Subsection, Truncate
 from dotenv import load_dotenv
 from experiment import Experiment
-from networks import ProgressNet, ProgressTest
+from networks import ProgressNet
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
-from train_functions import train_flat_features, train_flat_frames, train_progress, train_rsd, embed_frames
+from train_functions import train_flat_features, train_flat_frames, train_progress, embed_frames
 
 load_dotenv()
 
@@ -145,17 +145,7 @@ def main():
             backbone_path,
         )
     else:
-        network = ProgressTest(
-            args.pooling_layers,
-            args.roi_size,
-            args.dropout_chance,
-            args.embed_dim,
-            args.finetune,
-            args.backbone,
-            backbone_path,
-        )
-    # else:
-    #     raise Exception(f"Network {args.network} does not exist")
+        raise Exception(f"Network {args.network} does not exist")
 
     # load network file if available
     if args.load_experiment and args.load_iteration:
@@ -207,18 +197,6 @@ def main():
         train_fn = None
     elif "images" not in args.data_dir and args.flat:
         train_fn = train_flat_features
-    elif "images" not in args.data_dir and args.rsd_type != "none" and not args.flat:
-        train_fn = train_rsd
-        result = {
-            "rsd_l1_loss": 0.0,
-            "rsd_smooth_l1_loss": 0.0,
-            "rsd_l2_loss": 0.0,
-            "rsd_normal_l1_loss": 0.0,
-            "l1_loss": 0.0,
-            "smooth_l1_loss": 0.0,
-            "l2_loss": 0.0,
-            "count": 0,
-        }
     elif "images" in args.data_dir and args.flat:
         train_fn = train_flat_frames
     else:
