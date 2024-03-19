@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
 
-from .datasets import ImageDataset, FeatureDataset, UCFDataset, Middle
+from datasets import ImageDataset, FeatureDataset, UCFDataset, Middle
 from dotenv import load_dotenv
 from PIL import Image
 from typing import Dict, List
@@ -534,13 +534,13 @@ def dataset_visualisations():
     plt.close()
 
 def visualise_results():
-    for index, timestamp in zip(['00015'], [(0, 15)]):
-        visualise_video(
-            os.path.join(BARS_IMAGES,index), timestamp,
-            [('ProgressNet', os.path.join(BARS,f'{index}.txt'), '-.')],
-            f'bars_video{index}', 1
-        )
-    for index, timestamp in zip(['GolfSwing/v_GolfSwing_g01_c03'], [(0,25)]): #zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
+    # for index, timestamp in zip(['00015'], [(0, 15)]):
+    #     visualise_video(
+    #         os.path.join(BARS_IMAGES,index), timestamp,
+    #         [('ProgressNet', os.path.join(BARS,f'{index}.txt'), '-.')],
+    #         f'bars_video{index}', 1
+    #     )
+    for index, timestamp in zip(['GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02'], [(0,25), (0,45)]): #zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
        visualise_video(
            os.path.join(UCF_IMAGES,f'{index}'), timestamp,
            [('ProgressNet (full-video)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),

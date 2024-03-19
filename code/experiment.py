@@ -17,7 +17,6 @@ def get_device() -> torch.device:
         device = "cpu"
     return torch.device(device)
 
-
 class Experiment:
     def __init__(
         self,
