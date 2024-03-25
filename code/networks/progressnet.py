@@ -79,29 +79,29 @@ class ProgressNet(nn.Module):
         self.fc7 = nn.Linear(embed_dim * 2, 64)
         self.fc7_dropout = nn.Dropout(p=dropout_chance)
 
-        # self.lstm1 = nn.GRU(64, 32, batch_first=True)
-        # self.lstm2 = nn.GRU(32, 32, batch_first=True)
+        self.lstm1 = nn.GRU(64, 32, batch_first=True)
+        self.lstm2 = nn.GRU(32, 32, batch_first=True)
 
         # dim = 64
         # num_heads = 8 
         # self.multihead_attn = nn.MultiheadAttention(dim, num_heads, batch_first = True)
         
-        input_size = 64
-        num_layers = 6
-        num_heads = 8
-        self.model = nn.Transformer(input_size, num_heads, num_layers, batch_first=True)
+        # input_size = 64
+        # num_layers = 6
+        # num_heads = 8
+        # self.model = nn.Transformer(input_size, num_heads, num_layers, batch_first=True)
        
-        self.pe = PositionalEncoding(64, 1000, 0.5)
+        self.pe = PositionalEncoding(64, 300, 0.5)
     
         if finetune:
             for param in self.parameters():
                 param.requires_grad = False
 
         # GRU
-        # self.fc8 = nn.Linear(32, 1)
+        self.fc8 = nn.Linear(32, 1)
         
         #Transformer and MultiheadAttention
-        self.fc8 = nn.Linear(64, 1)
+        # self.fc8 = nn.Linear(64, 1)
 
         self.hidden1, self.hidden2 = None, None
 
@@ -147,25 +147,25 @@ class ProgressNet(nn.Module):
         data = torch.relu(data)
         
         # Standard GRU
-        # data = data.reshape(B, S, -1)
-        # data, self.hidden1 = self.lstm1(data, self.hidden1)
-        # data, self.hidden2 = self.lstm2(data, self.hidden2)
-        # data = data.reshape(num_samples, -1)
-        # data = self.fc8(data)
-        # data = torch.sigmoid(data)
-
-        data_mask = nn.Transformer.generate_square_subsequent_mask(num_samples)
-
-        # Transformer
         data = data.reshape(B, S, -1)
-        # data = [bias, seq_length, -1]
-        data = torch.permute(data, (1,0,2)) #S, B, -1
-        data_pe = self.pe(data)
-        data_pe = torch.permute(data_pe, (1, 0, 2)) #data = torch.permute(data, (1, 0, 2))
-        data = self.model(data_pe, data_pe, src_mask = data_mask, tgt_mask = data_mask)
+        data, self.hidden1 = self.lstm1(data, self.hidden1)
+        data, self.hidden2 = self.lstm2(data, self.hidden2)
         data = data.reshape(num_samples, -1)
         data = self.fc8(data)
         data = torch.sigmoid(data)
+
+        # data_mask = nn.Transformer.generate_square_subsequent_mask(num_samples)
+
+        # Transformer
+        # data = data.reshape(B, S, -1)
+        # # data = [bias, seq_length, -1]
+        # data = torch.permute(data, (1,0,2)) #S, B, -1
+        # data_pe = self.pe(data)
+        # data_pe = torch.permute(data_pe, (1, 0, 2)) #data = torch.permute(data, (1, 0, 2))
+        # data = self.model(data_pe, data_pe, src_mask = data_mask, tgt_mask = data_mask, src_is_causal = True, tgt_is_causal = True, memory_mask = data_mask)
+        # data = data.reshape(num_samples, -1)
+        # data = self.fc8(data)
+        # data = torch.sigmoid(data)
 
         # Multihead attention
         # data = data.reshape(B, S, -1)

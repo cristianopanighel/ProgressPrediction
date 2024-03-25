@@ -136,7 +136,14 @@ class UCFDataset(Dataset):
 
                 num_frames = boxes.shape[0]
                 lengths.append(num_frames)
-                progress = torch.arange(1, num_frames + 1) / num_frames
+                
+                numf = database[video_name]["numf"]
+                starting_point = tube["sf"]
+                ending_point = tube["ef"]
+                progress = torch.arange(1, numf + 1) / numf
+                progress = progress[starting_point:ending_point]
+
+                # progress = torch.arange(1, num_frames + 1) / num_frames
 
                 video_length = (num_frames / self.fps)
                 if self.rsd_type == 'minutes':

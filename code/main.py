@@ -7,7 +7,7 @@ import wandb
 from arguments import parse_args, wandb_init
 from datasets import ImageDataset, UCFDataset, Subsample, Subsection, Truncate
 from dotenv import load_dotenv
-from experiment import Experiment
+from experiment import Experiment, get_device
 from networks import ProgressNet
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -22,6 +22,27 @@ def set_seeds(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
 
+# def collate(batch):
+#    batch = filter(lambda x: x is not None, batch)
+#    print()
+#    return torch.utils.data.dataloader.default_collate(batch)
+
+# def collate_fn_padd(batch):
+#     '''
+#     Padds batch of variable length
+# 
+#     note: it converts things ToTensor manually here since the ToTensor transform
+#     assume it takes in images rather than arbitrary tensors.
+#     '''
+#     device = get_device()
+#     ## get sequence lengths
+#     lengths = torch.tensor([int(t[1].shape[0]) for t in batch ]).to(device)
+#     ## padd
+#     #batch = [ t[2].to(device) for t in batch ]
+#     batch = torch.nn.utils.rnn.pad_sequence([batch], padding_value = 0)
+#     ## compute mask
+#     # mask = (batch != 0).to(device)
+#     return batch#, lengths, mask
 
 def main():
     args = parse_args()
@@ -119,10 +140,10 @@ def main():
             )
 
     trainloader = DataLoader(
-        trainset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True
+        trainset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True# , collate_fn=collate_fn_padd
     )
     testloader = DataLoader(
-        testset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False
+        testset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False# , collate_fn=collate_fn_padd
     )
 
     # load backbone and create the network

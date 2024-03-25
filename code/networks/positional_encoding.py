@@ -1,5 +1,6 @@
 import math
 import torch
+import numpy as np
 
 from torch import nn, Tensor
 
@@ -21,5 +22,15 @@ class PositionalEncoding(nn.Module):
         Arguments:
             x: Tensor, shape ``[seq_len, batch_size, embedding_dim]``
         """
+        # random
+        # idx = torch.randperm(x.shape[0])
+        # y = x[idx].view(x.size())
+        # x = y + self.pe[:x.size(0)]
+
+        # reverse
+        # y = torch.flip(x, (1, 0, 2))
+        # x = y + self.pe[:x.size(0)]
+
+        # normal
         x = x + self.pe[:x.size(0)]
         return self.dropout(x)

@@ -21,11 +21,18 @@ load_dotenv()
 DATA_ROOT = os.environ.get("MAIN")
 BARS_IMAGES = os.environ.get("BARS_IMAGES")
 BARS = os.environ.get("BARS")
+
 UCF_IMAGES = os.environ.get("UCF_IMAGES")
 UCF = os.environ.get("UCF")
+UCF_RESNET18 = os.environ.get("UCF_RESNET18")
 UCF_SEGMENTS = os.environ.get("UCF_SEGMENTS")
+UCF_RESNET18_SEGMENTS = os.environ.get("UCF_RESNET18_SEGMENTS")
+UCF_RESNET18_MASK_SEGMENTS = os.environ.get("UCF_RESNET18_MASK_SEGMENTS")
 UCF_MASK = os.environ.get("UCF_MASK")
+UCF_MASK_RANDOM_PE = os.environ.get("UCF_MASK_RANDOM_PE")
+UCF_MASK_REVERSE_PE = os.environ.get("UCF_MASK_REVERSE_PE")
 UCF_TF = os.environ.get("UCF_TF")
+
 BREAKFAST_IMAGES = os.environ.get("BREAKFAST_IMAGES")
 BREAKFAST = os.environ.get("BREAKFAST")
 BAR_WIDTH = 0.5
@@ -540,13 +547,17 @@ def visualise_results():
     #         [('ProgressNet', os.path.join(BARS,f'{index}.txt'), '-.')],
     #         f'bars_video{index}', 1
     #     )
-    for index, timestamp in zip(['GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02'], [(0,25), (0,45)]): #zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
+    for index, timestamp in zip(['GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'Biking/v_Biking_g01_c02'], [(0,25), (0,45), (0, 80)]): #zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
        visualise_video(
            os.path.join(UCF_IMAGES,f'{index}'), timestamp,
-           [('ProgressNet (full-video)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),
+           [#('ProgressNet (VGG11)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            #('ProgressNet (ResNet18)', os.path.join(UCF_RESNET18,f'{index.replace("/", "_")}_0.txt'), '-.'),
             #('ProgressNet (video-segments)',os.path.join(UCF_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
-             ('ProgressNet (mask)', os.path.join(UCF_MASK,f'{index.replace("/", "_")}_0.txt'), '-.'),
-             ('ProgressNet (tf)', os.path.join(UCF_TF,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            #('ProgressNet (video-segments masked)',os.path.join(UCF_RESNET18_MASK_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            ('ProgressNet (masked Transformer)', os.path.join(UCF_MASK,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            ('ProgressNet (random pe)', os.path.join(UCF_MASK_RANDOM_PE,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            ('ProgressNet (reverse pe)', os.path.join(UCF_MASK_REVERSE_PE,f'{index.replace("/", "_")}_0.txt'), '-.'),
+            #('ProgressNet (tf)', os.path.join(UCF_TF,f'{index.replace("/", "_")}_0.txt'), '-.'),
             ('average-index', f'./data/ucf_baseline.txt', '-')],
            f'ucf_video_{index.replace("/", "_")}', 1
        )
@@ -573,33 +584,33 @@ def main():
     except:
         pass
 
-    set_font_sizes(16, 18, 20)
-    plot_baselines()
-    plot_baseline_example()
+    # set_font_sizes(16, 18, 20)
+    # plot_baselines()
+    # plot_baseline_example()
 
-    dataset_visualisations()
-    dataset_statistics()
+    # dataset_visualisations()
+    # dataset_statistics()
 
     # result plots
-    results = load_results(os.environ.get("RESULTS"))
-    for dataset in ["UCF101-24"]:#, "breakfast"]:
-        plot_result_bar(results, dataset, [
-                        "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
-        plot_result_bar(results, dataset, [
-                        "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
-    plot_result_bar(results, "Bars", [
-                    "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
-    # average index baseline
-    set_font_sizes()
-    # dataset statistics
-    plot_dataset_lengths()
-    # syntethic dataset example
-    plot_synthetic(4, [0, 3, 7, 11, 15])
-    # example progress predictions
+    # results = load_results(os.environ.get("RESULTS"))
+    # for dataset in ["UCF101-24"]:#, "breakfast"]:
+    #     plot_result_bar(results, dataset, [
+    #                     "'full-video' inputs", "'random-noise' inputs"], ['full video', 'random'])
+    #     plot_result_bar(results, dataset, [
+    #                     "'video-segments' inputs", "'frame-indices' inputs"], ['video segments', 'indices'])
+    # plot_result_bar(results, "Bars", [
+    #                 "'full-video' inputs", "'video-segments' inputs"], ['full video', 'video segments'])
+    # # average index baseline
+    # set_font_sizes()
+    # # dataset statistics
+    # plot_dataset_lengths()
+    # # syntethic dataset example
+    # plot_synthetic(4, [0, 3, 7, 11, 15])
+    # # example progress predictions
     set_font_sizes(16, 18, 20)
     visualise_results()
-    errors = load_results(os.environ.get("ERRORS"))
-    plot_errors_class(errors, "UCF101-24", ['MAE', 'MSE'], ['MAE', 'MSE'])
+    # errors = load_results(os.environ.get("ERRORS"))
+    # plot_errors_class(errors, "UCF101-24", ['MAE', 'MSE'], ['MAE', 'MSE'])
 
 
 if __name__ == '__main__':
