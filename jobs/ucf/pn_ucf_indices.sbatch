@@ -1,6 +1,6 @@
 #!/bin/sh
 ### job name
-#SBATCH --job-name=pn_ucf_indices
+#SBATCH --job-name=pn_ucf_resnet18_indices
 
 ###
 #SBATCH --mail-type=ALL
@@ -30,7 +30,7 @@ wandb offline
 export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:32
 python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --seed 42 \
-    --experiment_name pn_ucf_indices \
+    --experiment_name pn_ucf_resnet18_indices \
     --wandb_name pn_ucf_indices \
     --wandb_project pn_ucf_indices \
     --dataset ucf24 \
@@ -41,8 +41,8 @@ python3 /home/cpanighe/ProgressPrediction/code/main.py \
     --batch_size 1 \
     --iterations 50000 \
     --network progressnet \
-    --backbone vgg11 \
-    --load_backbone vgg11.pth \
+    --backbone resnet18 \
+    --load_backbone resnet18.pth \
     --dropout_chance 0.5 \
     --lr_decay 1.0 \
     --lr_decay_every 1000000 \

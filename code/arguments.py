@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--wandb_name", type=str, default=None)
     parser.add_argument("--wandb_disable", action="store_true")
     # data
-    parser.add_argument("--dataset", type=str, default="ucf24") #bars
+    parser.add_argument("--dataset", type=str, default="bars") #bars
     # parser.add_argument("--data_dir", type=str,
     #                     default="features/i3d_embeddings/")
     parser.add_argument("--data_dir", type=str, default="rgb-images")
@@ -51,7 +51,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--train_split", type=str, default="train.txt")
     parser.add_argument("--test_split", type=str, default="test.txt")
     # training
-    parser.add_argument("--batch_size", type=int, default=1)
+    parser.add_argument("--batch_size", type=int, default=1) #40
     parser.add_argument("--iterations", type=int, default=10000)
     # network
     parser.add_argument(
@@ -62,10 +62,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--backbone",
         type=str,
-        default='vgg11',
+        default='resnet18',
         choices=["vgg16", 'vgg11', "resnet18", "resnet152", "swintransformer", "resnext50"],
     )
-    parser.add_argument("--load_backbone", type=str, default=None)
+    parser.add_argument("--load_backbone", type=str, default='resnet18.pth')
     # network parameters
     parser.add_argument("--feature_dim", type=int, default=64)
     parser.add_argument("--embed_dim", type=int, default=1024)

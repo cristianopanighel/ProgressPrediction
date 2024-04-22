@@ -6,10 +6,11 @@ class Subsection:
         length = len(indices)
         if length == 1:
             return indices
-        start = random.randrange(0, length - 1)
-        remaining = length - start
-        duration = random.randint(1, remaining)
-
+        # start = random.randrange(0, length - 1)
+        # remaining = length - start
+        # duration = random.randint(1, remaining)
+        start = random.randrange(0, length // 2)
+        duration = random.randint(length//2 + 1, length)
         return indices[start:start+duration]
 
 class Subsample:

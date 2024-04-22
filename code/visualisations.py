@@ -26,6 +26,7 @@ UCF_IMAGES = os.environ.get("UCF_IMAGES")
 UCF = os.environ.get("UCF")
 UCF_RESNET18 = os.environ.get("UCF_RESNET18")
 UCF_SEGMENTS = os.environ.get("UCF_SEGMENTS")
+UCF_VGG_SEGMENTS = os.environ.get("UCF_VGG_SEGMENTS")
 UCF_RESNET18_SEGMENTS = os.environ.get("UCF_RESNET18_SEGMENTS")
 UCF_RESNET18_MASK_SEGMENTS = os.environ.get("UCF_RESNET18_MASK_SEGMENTS")
 UCF_MASK = os.environ.get("UCF_MASK")
@@ -33,8 +34,17 @@ UCF_MASK_RANDOM_PE = os.environ.get("UCF_MASK_RANDOM_PE")
 UCF_MASK_REVERSE_PE = os.environ.get("UCF_MASK_REVERSE_PE")
 UCF_TF = os.environ.get("UCF_TF")
 
+UCF_NUOVO_SEGMENTS = os.environ.get("UCF_NUOVO_SEGMENTS")
+UCF_NUOVO_MASK_SEGMENTS = os.environ.get("UCF_NUOVO_MASK_SEGMENTS")
+
 BREAKFAST_IMAGES = os.environ.get("BREAKFAST_IMAGES")
 BREAKFAST = os.environ.get("BREAKFAST")
+BREAKFAST_RESNET18 = os.environ.get("BREAKFAST_RESNET18")
+BREAKFAST_MASK = os.environ.get("BREAKFAST_MASK")
+BREAKFAST_SEGMENTS = os.environ.get("BREAKFAST_SEGMENTS")
+BREAKFAST_RESNET18_SEGMENTS = os.environ.get("BREAKFAST_RESNET18_SEGMENTS")
+BREAKFAST_RESNET18_MASK_SEGMENTS = os.environ.get("BREAKFAST_RESNET18_MASK_SEGMENTS")
+
 BAR_WIDTH = 0.5
 SPACING = 1.5
 MODE_COLOURS = {
@@ -547,27 +557,31 @@ def visualise_results():
     #         [('ProgressNet', os.path.join(BARS,f'{index}.txt'), '-.')],
     #         f'bars_video{index}', 1
     #     )
-    for index, timestamp in zip(['GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'Biking/v_Biking_g01_c02'], [(0,25), (0,45), (0, 80)]): #zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
-       visualise_video(
-           os.path.join(UCF_IMAGES,f'{index}'), timestamp,
-           [#('ProgressNet (VGG11)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            #('ProgressNet (ResNet18)', os.path.join(UCF_RESNET18,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            #('ProgressNet (video-segments)',os.path.join(UCF_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            #('ProgressNet (video-segments masked)',os.path.join(UCF_RESNET18_MASK_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            ('ProgressNet (masked Transformer)', os.path.join(UCF_MASK,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            ('ProgressNet (random pe)', os.path.join(UCF_MASK_RANDOM_PE,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            ('ProgressNet (reverse pe)', os.path.join(UCF_MASK_REVERSE_PE,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            #('ProgressNet (tf)', os.path.join(UCF_TF,f'{index.replace("/", "_")}_0.txt'), '-.'),
-            ('average-index', f'./data/ucf_baseline.txt', '-')],
-           f'ucf_video_{index.replace("/", "_")}', 1
-       )
-    # for index, timestamp in zip(['P12_cam01_P12_pancake', 'P07_webcam01_P07_sandwich'], [(0,2870), (0,2135)]):
-    #     visualise_video(
-    #         os.path.join(BREAKFAST_IMAGES, f'{index}'), timestamp,
-    #         [('ProgressNet (full-video)', os.path.join(BREAKFAST, f'{index.replace("/", "_")}.txt'), '-.'),
-    #          ('average-index', f'./data/bf_baseline.txt', '-')],
-    #          f'bf_video_{index.replace("/", "_")}', 1, subsample = 15
-    #     )
+    # for index, timestamp in zip(['GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'Biking/v_Biking_g01_c02'], [(0,25), (0,45), (0, 80)]): #zip(['Biking/v_Biking_g01_c02', 'Fencing/v_Fencing_g01_c01', 'FloorGymnastics/v_FloorGymnastics_g01_c03', 'GolfSwing/v_GolfSwing_g01_c03', 'GolfSwing/v_GolfSwing_g01_c02', 'HorseRiding/v_HorseRiding_g01_c01'], [(0,80), (0,45), (0,60), (0,25), (0,45), (0,125)]):
+    #    visualise_video(
+    #        os.path.join(UCF_IMAGES,f'{index}'), timestamp,
+    #        [#('ProgressNet (VGG11)', os.path.join(UCF,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         #('ProgressNet (ResNet18)', os.path.join(UCF_RESNET18,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         ('ProgressNet (VGG11)',os.path.join(UCF_VGG_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         ('ProgressNet (ResNet18)',os.path.join(UCF_RESNET18_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         ('ProgressNet (masked Transformer)',os.path.join(UCF_RESNET18_MASK_SEGMENTS,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         #('ProgressNet (masked Transformer)', os.path.join(UCF_MASK,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         #('ProgressNet (random pe)', os.path.join(UCF_MASK_RANDOM_PE,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         #('ProgressNet (reverse pe)', os.path.join(UCF_MASK_REVERSE_PE,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         #('ProgressNet (tf)', os.path.join(UCF_TF,f'{index.replace("/", "_")}_0.txt'), '-.'),
+    #         #('average-index', f'./data/ucf_baseline.txt', '-')
+    #         ],
+    #        f'ucf_video_{index.replace("/", "_")}', 1
+    #    )
+    for index, timestamp in zip(['P07_webcam01_P07_sandwich'], [(0, 130)]):#, 'P12_cam01_P12_pancake'], [(0,2135), (0,2870)]):
+        visualise_video(
+            os.path.join(BREAKFAST_IMAGES, f'{index}'), timestamp,
+            [('ProgressNet (VGG11)', os.path.join(BREAKFAST_SEGMENTS, f'{index.replace("/", "_")}.txt'), '-.'),
+             ('ProgressNet (ResNet18)', os.path.join(BREAKFAST_RESNET18_SEGMENTS, f'{index.replace("/", "_")}.txt'), '-.'),
+             ('ProgressNet (masked Transformer)', os.path.join(BREAKFAST_RESNET18_MASK_SEGMENTS, f'{index.replace("/", "_")}.txt'), '-.'),
+             ('average-index', f'./data/bf_baseline.txt', '-')],
+             f'bf_video_{index.replace("/", "_")}', 1, subsample = 15
+        )
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--pdf', action='store_true')
